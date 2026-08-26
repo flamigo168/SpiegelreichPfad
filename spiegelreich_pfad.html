@@ -1,0 +1,1480 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e1113">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pfad">
+<title>SPIEGELREICH · Pfad</title>
+<style>
+  :root{
+    --bg:#0e1113; --panel:#131719; --linie:#262b2f; --linie2:#343b40;
+    --text:#dcd6c9; --dim:#7d8489;
+    --kampf:#a8402b; --rast:#5f8a72; --ereignis:#8272b0; --fest:#7b8288; --boss:#c9a227;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--text);
+    font-family:'Shippori Mincho','Iowan Old Style',Georgia,serif;
+    display:flex;flex-direction:column;overflow:hidden;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
+
+  /* Kopf */
+  #kopf{display:flex;align-items:center;gap:12px;padding:8px 12px;
+    border-bottom:1px solid var(--linie);background:var(--panel);flex-wrap:wrap}
+  .marke{font-size:14px;font-weight:800;letter-spacing:.08em;white-space:nowrap}
+  .marke i{font-style:normal;color:var(--dim);font-weight:400;font-size:11px;margin-left:7px;letter-spacing:.14em}
+  .wippe{display:inline-flex;border:1px solid var(--linie2);border-radius:2px;overflow:hidden}
+  .wippe button{background:none;border:none;color:var(--dim);font:inherit;font-size:13px;
+    padding:7px 16px;cursor:pointer;letter-spacing:.03em}
+  .wippe button.an{background:#20262a;color:var(--text)}
+  .wippe.klein{margin:9px 12px 0}
+  .wippe.klein button{font-size:12px;padding:6px 13px}
+  .stat{display:flex;gap:16px;margin-left:auto;align-items:baseline}
+  .zahl{font-size:15px;line-height:1;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+  .zahl i{font-style:normal;font-family:ui-monospace,monospace;font-size:9px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+  .ikon{background:none;border:1px solid var(--linie2);color:var(--text);width:32px;height:32px;
+    border-radius:2px;font:inherit;font-size:15px;cursor:pointer;line-height:1}
+
+  main{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+  .split{flex:1;min-height:0;display:flex;flex-direction:column}
+  .buehne{flex:1;min-height:0;position:relative}
+  .buehne svg{width:100%;height:100%;display:block;touch-action:none;
+    -webkit-user-select:none;user-select:none}
+  .buehne svg [data-exit] circle{transition:filter .12s ease}
+  .buehne svg [data-exit]:hover circle,
+  .buehne svg [data-exit]:active circle{filter:brightness(1.4)}
+  .hinweis-karte{position:absolute;left:12px;bottom:8px;pointer-events:none;
+    font-family:ui-monospace,monospace;font-size:9px;letter-spacing:.16em;
+    text-transform:uppercase;color:#4d5459}
+
+  /* Paneel: Schublade unten, Leiste rechts ab 900px */
+  .paneel{border-top:1px solid var(--linie);background:var(--panel);position:relative;
+    max-height:46vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .paneel-in{padding:12px 14px 18px}
+  .paneel.zu{max-height:22px;overflow:hidden}
+  .griff{display:block;width:100%;height:22px;border:none;background:none;cursor:pointer;padding:0}
+  .griff::before{content:"";display:block;width:38px;height:3px;border-radius:2px;
+    background:var(--linie2);margin:9px auto 0}
+
+  /* Inhalte */
+  .lbl{font-family:ui-monospace,monospace;font-size:9.5px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--dim)}
+  .kopfzeile{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:5px}
+  .kopfzeile strong{font-size:17px}
+  .pkt{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none;align-self:center}
+  .text{font-size:12.5px;color:var(--dim);line-height:1.55;margin:0}
+  .fuehrung{font-size:12px;color:var(--dim);line-height:1.5;margin:9px 0}
+  .banner{border-left:3px solid var(--kampf);background:#1a1416;padding:8px 10px;
+    font-size:13px;margin:9px 0}
+  .warn{color:var(--kampf)}
+  .trenner{height:1px;background:var(--linie);margin:15px 0 11px}
+  .reihe{display:flex;gap:7px;flex-wrap:wrap}
+  .gitter2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  button.btn,label.btn{border:1px solid var(--linie2);background:#171b1e;color:var(--text);
+    border-radius:2px;padding:9px 13px;font:inherit;font-size:13px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;text-align:center}
+  button.btn:hover,label.btn:hover{border-color:#4a5257}
+  button.btn:active,label.btn:active{background:#1f2528}
+  button.btn:disabled{opacity:.3;cursor:default}
+  button.btn.an-toggle{border-color:var(--text);background:#222a2e}
+  .stand{width:100%;border-collapse:collapse;font-size:12.5px}
+  .stand td{padding:4px 0;vertical-align:top}
+  .stand td:first-child{color:var(--dim);width:38%;font-family:ui-monospace,monospace;
+    font-size:10px;letter-spacing:.13em;text-transform:uppercase;padding-top:6px}
+  .verlauf{margin-top:12px;font-size:11.5px;color:#5f666b;line-height:1.7}
+
+  /* Überlagerung auf der Bühne */
+  .ueber{position:absolute;left:0;right:0;bottom:0;background:#0f1214f2;
+    border-top:1px solid var(--linie2);padding:10px 12px 14px;backdrop-filter:blur(6px)}
+  .ueber-kopf{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+  .wahl{display:grid;gap:8px}
+  .zug{display:flex;flex-direction:column;gap:4px;text-align:left;cursor:pointer;
+    border:1px solid var(--linie2);border-left:3px solid var(--f);background:#15191c;
+    color:var(--text);font:inherit;padding:10px 11px;border-radius:2px}
+  .zug:hover{background:#1a1f22}
+  .zug-kopf{display:flex;align-items:center;gap:7px;font-size:14.5px}
+  .liste{display:grid;gap:6px;max-height:34vh;overflow-y:auto}
+  .zeile{display:flex;align-items:center;gap:8px;text-align:left;cursor:pointer;
+    border:1px solid var(--linie2);background:#15191c;color:var(--text);font:inherit;
+    font-size:13px;padding:9px 11px;border-radius:2px}
+  .zeile .lbl{margin-left:auto}
+
+  /* Vollseiten */
+  .seite{flex:1;min-height:0;overflow-y:auto;padding:14px 16px 26px}
+  .seite-kopf{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .gitter{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+  .kachel{display:flex;align-items:center;gap:10px;text-align:left;cursor:pointer;
+    border:1px solid var(--linie);border-left:3px solid var(--f);background:#15191c;
+    color:var(--text);font:inherit;padding:9px 10px;border-radius:2px}
+  .kachel:hover{background:#1a1f22;border-color:var(--linie2)}
+  .kachel.breit{grid-column:1/-1;cursor:default}
+  .kachel img{width:54px;height:47px;object-fit:cover;border:1px solid var(--linie);flex:none}
+  .platz{width:54px;height:47px;border:1px solid var(--linie);display:flex;
+    align-items:center;justify-content:center;font-size:19px;flex:none;background:#0f1214}
+  .kachel-txt{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .kachel-txt strong{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  input,select,textarea{background:#0f1214;border:1px solid var(--linie2);color:var(--text);
+    font:inherit;font-size:13px;padding:8px 9px;border-radius:2px;width:100%}
+  textarea{resize:vertical;min-height:54px;line-height:1.5}
+  .feld{margin-bottom:9px}
+  .feld .lbl{display:block;margin-bottom:4px}
+  .zwei{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  dialog{background:var(--panel);color:var(--text);border:1px solid var(--linie2);
+    max-width:min(580px,94vw);width:100%;padding:0;border-radius:2px}
+  dialog::backdrop{background:#000b}
+  .dlg-in{padding:16px;max-height:86vh;overflow-y:auto}
+  code{font-family:ui-monospace,monospace;font-size:11px;color:var(--text)}
+
+  @media (min-width:900px){
+    .split{flex-direction:row}
+    .buehne{order:1}
+    .paneel{order:2;width:370px;flex:none;max-height:none;height:100%;
+      border-top:none;border-left:1px solid var(--linie);
+      display:flex;align-items:stretch;transition:width .18s ease}
+    .paneel .paneel-in{flex:1;min-width:0;overflow-y:auto;height:100%}
+    .paneel.zu{width:20px;overflow:hidden}
+    .paneel.zu .paneel-in{display:none}
+    .griff{display:block;width:20px;flex:none;height:auto;writing-mode:vertical-rl;cursor:pointer}
+    .griff::before{width:3px;height:34px;margin:auto}
+    .ueber{left:auto;right:auto;width:100%}
+    .wahl{grid-template-columns:repeat(3,1fr)}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="kopf"></div>
+<main id="main"></main>
+<dialog id="dlg"><div class="dlg-in" id="dlg-in"></div></dialog>
+<script>
+"use strict";
+
+"use strict";
+/* ============================================================
+   Geometrie · Flat-Top-Hex, feste Tischausrichtung, nie drehen
+   12 oben · 2 oben rechts · 4 rechts unten · 6 unten · 8 links unten · 10 oben links
+   Ausgänge 10/12/2 · Eingänge 4/6/8
+   ============================================================ */
+const DIR={12:[0,-1],2:[1,-1],4:[1,0],6:[0,1],8:[-1,1],10:[-1,0]};
+const GEGENKANTE={10:4,12:6,2:8,4:10,6:12,8:2};
+const WINKEL={4:30,6:90,8:150,10:210,12:270,2:330};
+const AUSGANGSKANTEN=[10,12,2];
+const TYPEN=[
+  {t:"I",name:"Gabelung",a:[10,2]},{t:"II",name:"Linksknick",a:[10]},
+  {t:"III",name:"Rechtsknick",a:[2]},{t:"IV",name:"Kreuzung",a:[10,12,2]},
+  {t:"V",name:"Durchgang",a:[12]},{t:"VI",name:"Linksgabel",a:[10,12]},
+  {t:"VII",name:"Rechtsgabel",a:[12,2]},{t:"VIII",name:"Sackgasse",a:[]}];
+function typVon(a){const s=[...a].sort((x,y)=>x-y).join(",");
+  return TYPEN.find(t=>[...t.a].sort((x,y)=>x-y).join(",")===s)||{t:"—",name:"frei"};}
+const standardArten=()=>[
+  {id:"kampf",name:"Kampf",farbe:"#a8402b",symbol:"⚔"},
+  {id:"rast",name:"Rast",farbe:"#5f8a72",symbol:"◉"},
+  {id:"ereignis",name:"Ereignis",farbe:"#8272b0",symbol:"?"},
+  {id:"fest",name:"Fest",farbe:"#7b8288",symbol:"△"},
+  {id:"boss",name:"Boss",farbe:"#c9a227",symbol:"✦"},
+];
+const artInfo=art=>(S&&S.arten&&S.arten.find(a=>a.id===art))||{id:art,name:art,farbe:"#888",symbol:""};
+const artFarbe=art=>artInfo(art).farbe;
+const artSymbol=art=>artInfo(art).symbol;
+const key=(q,r)=>q+","+r;
+const zuQR=k=>k.split(",").map(Number);
+const shuffle=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
+const stufeText=n=>n>=9?"Schwer":n>=5?"Normal":"Mob";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ============================================================
+   Saat · Plättchen v1.2
+   ============================================================ */
+const RAST_STD="Heile 4 LP + 1 je erreichter Stufe ODER entferne 1 Karte dauerhaft";
+function saatPlaettchen(){
+  const A=t=>[...TYPEN.find(x=>x.t===t).a];
+  const K=(id,name,typ,v,g,m,th,ex)=>({id,name,art:"kampf",ausgaenge:A(typ),v,
+    rueck:`${g} Gegner je Spieler${m?" · Modi "+m:""} · Themenwahl: ${th}${ex?" · "+ex:""}`});
+  const R=(id,name,typ,v,rueck)=>({id,name,art:"rast",ausgaenge:A(typ),v,rueck});
+  const E=(id,name,typ,v,rueck)=>({id,name,art:"ereignis",ausgaenge:A(typ),v,rueck});
+  return [
+    K("K01","Stollenmund","I","A",3,"","zwei"),K("K02","Förderschacht","I","A",3,"","alle drei"),
+    K("K03","Schlackenhalde","I","A",3,"+1","zwei"),K("K04","Erzkammer","I","A",2,"","alle drei"),
+    K("K05","Pochwerk","I","A",3,"","zwei","alle Kettenoni, falls verfügbar"),
+    K("K06","Rostgalerie","I","A",3,"","zwei"),
+    K("K07","Bruchfeld","II","A",4,"","NUR EINES","2 Karten je Spieler"),
+    K("K08","Wetterschacht","II","A",2,"+1","alle drei"),
+    K("K09","Zunderstollen","II","A",3,"","zwei","alle Glutoni, falls verfügbar"),
+    K("K10","Aschekammer","III","A",3,"","zwei"),K("K11","Kohlenmeiler","III","A",3,"+1","zwei"),
+    K("K12","Tiefe Sohle","III","A",4,"","NUR EINES","2 Karten je Spieler"),
+    K("K13","Grubenwasser","I","A",2,"","alle drei"),K("K14","Ofenhalle","I","A",3,"+1","zwei"),
+    K("K15","Einsturzstelle","VIII","B",4,"","NUR EINES","2 Karten je Spieler · doppeltes Geld"),
+    K("K16","Blindschacht","V","B",3,"","NUR EINES"),K("K17","Glutspalte","VII","B",3,"+1","alle drei"),
+    K("K18","Schmelzgrube","IV","B",2,"","alle drei"),
+    R("R01","Bergmannsklause","I","A",RAST_STD),R("R02","Verlassenes Lager","I","A",RAST_STD),
+    R("R03","Quellstollen","II","A",RAST_STD),R("R04","Alte Kaue","III","A",RAST_STD),
+    R("R05","Schreinnische","I","A","Heile 3 LP UND entferne 1 Karte dauerhaft"),
+    R("R06","Trockenplatz","V","B",RAST_STD),
+    R("R07","Werkzeugkammer","VI","B","Heile 2 LP · Jeder darf 1 Karte dauerhaft entfernen"),
+    R("R08","Wetterloch","VII","B",RAST_STD),
+    R("R09","Kodama-Nische","IV","B","Heile 6 LP · Zurücklauf-Malus entfällt bis zum nächsten Scharmützel"),
+    E("E01","Fundgrube","I","A","Ziehe 1 Ereigniskarte"),
+    E("E02","Opferschacht","I","A","Ziehe 2 Ereigniskarten, spielt eine — die andere kommt aus dem Spiel"),
+    E("E03","Spiegelader","II","A","Ziehe 1 Ereigniskarte"),
+    E("E04","Verschütteter Gang","III","A","Ziehe 1 Ereigniskarte · Zahlt 2 Geld je Spieler, sonst passiert nichts"),
+    E("E05","Blutader","I","A","Ziehe 1 Ereigniskarte · Sie wirkt doppelt, ihr Preis ebenso"),
+    E("E06","Krämerloch","V","B","Kleiner Handel: 3 Karten aus einem Vorrat aufdecken, aus der Kasse kaufbar"),
+    E("E07","Zerbrochene Nische","VIII","B","Ziehe 2 Ereigniskarten, spielt beide"),
+    E("E08","Alter Schrein","VI","B","Ziehe 1 Ereigniskarte"),
+    E("E09","Grubengeister","IV","B","Ziehe 1 Ereigniskarte · Danach 1 Plättchen aus dem Ablagestapel zurück in den Sack"),
+    {id:"S01",name:"Grubeneingang",art:"fest",ausgaenge:[10,2],v:"A",rueck:"Startfeld. Kein Effekt."},
+    {id:"M01",name:"Tatara-Ofen",art:"boss",ausgaenge:[10,2],v:"A",
+      rueck:"Mini-Boss Tatara-Oni. Droppt 1 Unikat. Bleibt im Angebot, bis er genommen wird."},
+    {id:"B01",name:"Die Esse",art:"boss",ausgaenge:[],v:"A",
+      rueck:"Endboss Akagane. Droppt 2 Unikate. Der Weg endet hier."},
+  ];
+}
+
+/* ============================================================
+   Bretter · begrenztes Spielfeld
+   zellen: "q,r" -> {rolle:"frei"|"start"|"fest", plaettchen?:id}
+   ============================================================ */
+function rasterZellen(b,h){
+  const z={};
+  for(let c=0;c<b;c++) for(let row=0;row<h;row++) z[key(c,row-Math.floor(c/2))]={rolle:"frei"};
+  return z;
+}
+function sanduhrZellen(b,h){
+  const z={};
+  const mc=(b-1)/2, mr=(h-1)/2;
+  for(let c=0;c<b;c++){
+    const d=Math.abs(c-mc);
+    for(let row=0;row<h;row++){
+      if(Math.abs(row-mr) < d*0.85) continue;      // Mitte wird zur Taille
+      z[key(c,row-Math.floor(c/2))]={rolle:"frei"};
+    }
+  }
+  return z;
+}
+function randZelle(zellen,unten){
+  // Bewegung geht netto nach oben: Start unten, Ziel oben. Bei Gleichstand die mittigste Spalte.
+  const ks=Object.keys(zellen); if(!ks.length) return null;
+  const qs=ks.map(k=>zuQR(k)[0]);
+  const mq=(Math.min(...qs)+Math.max(...qs))/2;
+  let best=null,by=null,bd=1e9;
+  for(const k of ks){
+    const [q,r]=zuQR(k), y=r+q/2, d=Math.abs(q-mq);
+    if(by===null || (unten? y>by : y<by)){ by=y; bd=d; best=k; }
+    else if(y===by && d<bd){ bd=d; best=k; }
+  }
+  return best;
+}
+const untersteZelle=z=>randZelle(z,true);
+const obersteZelle=z=>randZelle(z,false);
+function saatBretter(){
+  const raster=rasterZellen(7,6);
+  raster[untersteZelle(raster)]={rolle:"start",plaettchen:"S01"};
+  raster[obersteZelle(raster)]={rolle:"fest",plaettchen:"B01"};
+  const sand=sanduhrZellen(7,7);
+  sand[untersteZelle(sand)]={rolle:"start",plaettchen:"S01"};
+  sand[obersteZelle(sand)]={rolle:"fest",plaettchen:"B01"};
+  return [
+    {id:"F1",name:"Raster 7 × 6",breite:7,hoehe:6,zellen:raster},
+    {id:"F2",name:"Sanduhr 7 × 7",breite:7,hoehe:7,zellen:sand},
+  ];
+}
+function saatStufen(p,f){
+  const idsA=p.filter(t=>t.v==="A"&&!["S01","M01","B01"].includes(t.id)).map(t=>t.id);
+  const idsAB=p.filter(t=>!["S01","M01","B01"].includes(t.id)).map(t=>t.id);
+  return [
+    {id:"L1",name:"Stufe 1 · Netz",brettId:f[0].id,sack:[...idsA,"M01"],sackgroesse:0,zieh:3,
+     notiz:"24 A-Plättchen auf dem Raster. Nur Ausgänge 10 und 2."},
+    {id:"L2",name:"Stufe 2 · Labyrinth",brettId:f[1].id,sack:[...idsAB,"M01"],sackgroesse:0,zieh:3,
+     notiz:"Alle 36 Plättchen auf der Sanduhr. Volle Hexgeometrie."},
+  ];
+}
+
+/* ============================================================
+   Speicher
+   ============================================================ */
+const DB_NAME="spiegelreich",DB_VER=1;let _db=null;
+function db(){if(_db)return Promise.resolve(_db);
+  return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
+    r.onupgradeneeded=()=>{const d=r.result;
+      if(!d.objectStoreNames.contains("kv"))d.createObjectStore("kv");
+      if(!d.objectStoreNames.contains("img"))d.createObjectStore("img");};
+    r.onsuccess=()=>{_db=r.result;res(_db)};r.onerror=()=>rej(r.error);});}
+function tx(store,mode,fn){return db().then(d=>new Promise((res,rej)=>{
+  const t=d.transaction(store,mode),st=t.objectStore(store),rq=fn(st);
+  t.oncomplete=()=>res(rq?rq.result:undefined);
+  t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error);}));}
+const kvGet=k=>tx("kv","readonly",st=>st.get(k));
+const kvSet=(k,v)=>tx("kv","readwrite",st=>st.put(v,k));
+const imgGet=k=>tx("img","readonly",st=>st.get(k));
+const imgSet=(k,b)=>tx("img","readwrite",st=>st.put(b,k));
+const imgDel=k=>tx("img","readwrite",st=>st.delete(k));
+const imgKeys=()=>tx("img","readonly",st=>st.getAllKeys());
+
+/* ============================================================
+   Zustand
+   ============================================================ */
+let S=null,TAB="lauf",URLS={},RUECKLAUF=false;
+let VORHER=[];                   // nicht in S — wird nicht mitgespeichert
+const MAX_UNDO=20;
+let ANSICHT={x:0,y:0,k:1};
+let EDIT={brettId:null,pinsel:"an",festId:"K01"};
+let spLaeuft=false,spNochmal=false;
+
+const byId=id=>S.plaettchen.find(t=>t.id===id);
+const brettById=id=>S.bretter.find(b=>b.id===id);
+const stufeById=id=>S.stufen.find(s=>s.id===id);
+const kampagneById=id=>S.kampagnen.find(k=>k.id===id);
+function kampagneSack(K,levelIndex){
+  return Object.entries(K.freischaltung||{})
+    .filter(([id,ab])=>ab>=1&&ab<=levelIndex&&byId(id)).map(([id])=>id);
+}
+function laufKontext(quelle){
+  quelle=quelle||(S.lauf&&S.lauf.quelle)||{typ:"stufe",id:S.lauf&&S.lauf.stufeId};
+  if(quelle.typ==="kampagne"){
+    const K=kampagneById(quelle.kid),lvl=K&&K.level[quelle.lvl-1];
+    if(K&&lvl) return {name:K.name+" · Level "+quelle.lvl,brettId:lvl.brettId,
+      zieh:lvl.zieh||3,notiz:lvl.notiz||"",sackIds:kampagneSack(K,quelle.lvl),sackgroesse:lvl.sackgroesse||0};
+  }
+  const st=stufeById(quelle.id)||S.stufen[0];
+  return {name:st.name,brettId:st.brettId,zieh:st.zieh||3,notiz:st.notiz||"",sackIds:st.sack,sackgroesse:st.sackgroesse||0};
+}
+const brettAktiv=()=>brettById(laufKontext().brettId)||S.bretter[0];
+
+function neuerLaufAus(quelle){
+  const info=laufKontext(quelle);
+  const F=brettById(info.brettId)||S.bretter[0];
+  let sack=shuffle(info.sackIds.filter(id=>byId(id)));
+  if(info.sackgroesse>0) sack=sack.slice(0,info.sackgroesse);
+  const brett={};
+  let start=null;
+  for(const [k,z] of Object.entries(F.zellen)){
+    if(z.rolle==="start"){ start=k; if(byId(z.plaettchen)) brett[k]={id:z.plaettchen,von:null}; }
+    else if(z.rolle==="fest" && byId(z.plaettchen)) brett[k]={id:z.plaettchen,von:null,fest:true};
+  }
+  if(!start){ start=untersteZelle(F.zellen)||"0,0"; brett[start]={id:S.plaettchen[0].id,von:null}; }
+  return {quelle,brettId:F.id,brett,pos:zuQR(start),sack,ablage:[],
+          angebot:null,scharmuetzel:0,ende:null,log:["Der Weg beginnt."]};
+}
+function neuerLauf(stufeId){
+  return neuerLaufAus({typ:"stufe",id:(stufeById(stufeId)?stufeId:S.stufen[0].id)});
+}
+function neuerKampagnenLauf(kampagneId,levelIndex){
+  return neuerLaufAus({typ:"kampagne",kid:kampagneId,lvl:levelIndex});
+}
+
+const standardSpieler=()=>[1,2,3,4].map(n=>({name:"Spieler "+n,lp:10,geld:0,marker:0}));
+async function speichern(){
+  if(spLaeuft){spNochmal=true;return;}
+  spLaeuft=true;
+  try{await kvSet("stand",{plaettchen:S.plaettchen,bretter:S.bretter,stufen:S.stufen,lauf:S.lauf,
+    spieler:S.spieler,spielerAnzahl:S.spielerAnzahl,kampagnen:S.kampagnen,arten:S.arten});}
+  catch(e){meldung("Speichern fehlgeschlagen: "+e.message);}
+  spLaeuft=false; if(spNochmal){spNochmal=false;speichern();}
+}
+async function laden(){
+  let d=null; try{d=await kvGet("stand");}catch(e){}
+  if(d&&d.plaettchen&&d.plaettchen.length){
+    const bretter=(d.bretter&&d.bretter.length)?d.bretter:saatBretter();
+    S={plaettchen:d.plaettchen,bretter,
+       stufen:(d.stufen&&d.stufen.length)?d.stufen:saatStufen(d.plaettchen,bretter),
+       lauf:d.lauf||null,
+       spieler:(d.spieler&&d.spieler.length===4)?d.spieler:standardSpieler(),
+       spielerAnzahl:d.spielerAnzahl||2,
+       kampagnen:d.kampagnen||[],
+       arten:(d.arten&&d.arten.length)?d.arten:standardArten()};
+  }else{
+    const p=saatPlaettchen(),f=saatBretter();
+    S={plaettchen:p,bretter:f,stufen:saatStufen(p,f),lauf:null,spieler:standardSpieler(),spielerAnzahl:2,
+       kampagnen:[],arten:standardArten()};
+  }
+  S.stufen.forEach(st=>{if(!brettById(st.brettId)) st.brettId=S.bretter[0].id;});
+  if(!S.lauf||!S.lauf.brett) S.lauf=neuerLauf(S.stufen[0].id);
+  EDIT.brettId=S.bretter[0].id;
+  try{for(const k of await imgKeys()){const b=await imgGet(k); if(b) URLS[k]=URL.createObjectURL(b);}}catch(e){}
+}
+
+/* ============================================================
+   Lauf
+   ============================================================ */
+const aufBrett=k=>!!brettAktiv().zellen[k];
+function kantenLage(kante){
+  const L=S.lauf,[cq,cr]=L.pos,[dq,dr]=DIR[kante];
+  const zk=key(cq+dq,cr+dr);
+  if(!aufBrett(zk)) return {zk,lage:"aus"};        // Rand des Bretts
+  if(L.brett[zk]) return {zk,lage:"belegt"};
+  return {zk,lage:"frei"};
+}
+function ziehen(kante){
+  const L=S.lauf; if(L.angebot||L.ende) return;
+  merken();
+  const {zk,lage}=kantenLage(kante);
+  if(lage==="aus") return;
+  if(lage==="belegt"){
+    L.pos=zuQR(zk);
+    L.log.unshift("Auf "+byId(L.brett[zk].id).name+" gewechselt.");
+    pruefeEnde(); return nach();
+  }
+  if(L.sack.length===0){ L.log.unshift("Der Sack ist leer. Hier geht es nicht weiter."); pruefeEnde(); return nach(); }
+  const n=Math.max(1,laufKontext().zieh||3);
+  L.angebot={kante,ids:L.sack.slice(0,n)};
+  nach();
+}
+function waehlen(gewaehlt){
+  merken();
+  const L=S.lauf,{kante,ids}=L.angebot,[cq,cr]=L.pos,[dq,dr]=DIR[kante];
+  L.sack=L.sack.slice(ids.length);
+  let hinweis="";
+  for(const i of ids){
+    if(i===gewaehlt) continue;
+    if(i==="M01"){L.sack=shuffle([...L.sack,"M01"]);hinweis=" Der Mini-Boss wandert zurück in den Sack.";}
+    else L.ablage.push(i);
+  }
+  L.brett[key(cq+dq,cr+dr)]={id:gewaehlt,von:GEGENKANTE[kante]};
+  L.pos=[cq+dq,cr+dr];
+  const t=byId(gewaehlt);
+  if(t.art==="kampf"||t.art==="boss") L.scharmuetzel++;
+  L.angebot=null;
+  L.log.unshift(t.name+" betreten."+hinweis);
+  pruefeEnde(); nach();
+}
+function offeneAusgaenge(k,id){
+  const [q,r]=zuQR(k), t=byId(id); if(!t) return [];
+  return t.ausgaenge.filter(e=>{const[dq,dr]=DIR[e];const nk=key(q+dq,r+dr);
+    return aufBrett(nk)&&!S.lauf.brett[nk];});
+}
+function rueckZiele(){
+  const L=S.lauf,hier=key(L.pos[0],L.pos[1]);
+  return Object.entries(L.brett).filter(([k,f])=>k!==hier&&offeneAusgaenge(k,f.id).length)
+    .map(([k,f])=>({k,id:f.id}));
+}
+function zurueckLaufen(zk){
+  merken();
+  const L=S.lauf;
+  if(L.sack.length){L.ablage.push(L.sack[0]);L.sack=L.sack.slice(1);}
+  L.pos=zuQR(zk); L.angebot=null; RUECKLAUF=false;
+  L.log.unshift("Rücklauf zu "+byId(L.brett[zk].id).name+". Kosten: 1 Plättchen aus dem Sack.");
+  pruefeEnde(); nach();
+}
+function pruefeEnde(){
+  const L=S.lauf,hier=key(L.pos[0],L.pos[1]),f=L.brett[hier];
+  if(f&&f.fest&&byId(f.id)&&byId(f.id).art==="boss"){ L.ende="Der Endboss ist erreicht."; return; }
+  const hierOffen=offeneAusgaenge(hier,f.id).length;
+  if(hierOffen&&L.sack.length) {L.ende=null;return;}
+  const anderswo=rueckZiele().length;
+  if(!hierOffen&&!anderswo) L.ende="Kein offener Ausgang mehr. Der Lauf endet.";
+  else if(!L.sack.length&&!hierOffen) L.ende="Der Sack ist leer und hier geht es nicht weiter.";
+  else L.ende=null;
+}
+function nach(){S.lauf.log=S.lauf.log.slice(0,40);zentrieren();speichern();render();}
+function merken(){
+  VORHER.push(JSON.stringify(S.lauf));
+  if(VORHER.length>MAX_UNDO) VORHER.shift();
+}
+function undo(){
+  if(!VORHER.length) return;
+  S.lauf=JSON.parse(VORHER.pop());
+  RUECKLAUF=false;
+  zentrieren();speichern();render();
+}
+
+/* ============================================================
+   Dialoge
+   ============================================================ */
+const dlg=()=>document.getElementById("dlg");
+const dbox=()=>document.getElementById("dlg-in");
+function meldung(txt){dbox().innerHTML=`<div class="hinweis" style="margin-bottom:12px">${esc(txt)}</div>
+  <button class="btn" onclick="document.getElementById('dlg').close()">Gut</button>`;dlg().showModal();}
+function bestaetigen(txt,aufJa){
+  dbox().innerHTML=`<div style="margin-bottom:14px">${esc(txt)}</div>
+    <div class="reihe"><button class="btn" id="best-ja">Ja</button>
+      <button class="btn" id="best-nein">Nein</button></div>`;
+  dbox().querySelector("#best-ja").onclick=()=>{dlg().close();aufJa();};
+  dbox().querySelector("#best-nein").onclick=()=>dlg().close();
+  dlg().showModal();
+}
+
+function dialogFeldInfo(k){
+  const f=S.lauf.brett[k]; if(!f) return;
+  const t=byId(f.id); if(!t) return;
+  dbox().innerHTML=`<div class="kopfzeile" style="margin-bottom:8px">
+      <span class="pkt" style="background:${artFarbe(t.art)}"></span>
+      <strong>${esc(t.name)}</strong>
+      <span class="lbl">${esc(t.id)} · ${typVon(t.ausgaenge).name}</span></div>
+    <p class="text">${esc(t.rueck||"")}</p>
+    <button class="btn" onclick="document.getElementById('dlg').close()">Schließen</button>`;
+  dlg().showModal();
+}
+
+function dialogPlaettchen(id){
+  const neu=!id;
+  const t=neu?{id:"",name:"",art:"kampf",ausgaenge:[10,2],v:"A",rueck:""}:{...byId(id)};
+  const box=dbox();
+  box.innerHTML=`<div class="lbl" style="margin-bottom:10px">${neu?"Neues Plättchen":"Plättchen ändern"}</div>
+    <div class="zwei">
+      <div class="feld"><span class="lbl">ID</span><input id="f-id" value="${esc(t.id)}" ${neu?"":"readonly"}></div>
+      <div class="feld"><span class="lbl">Art</span>
+        <div class="reihe">
+          <select id="f-art" style="flex:1">${S.arten.map(a=>
+            `<option value="${a.id}" ${t.art===a.id?"selected":""}>${esc(a.name)}</option>`).join("")}</select>
+          <button type="button" class="btn" id="f-art-neu">＋ Typ</button>
+        </div>
+        <div id="f-art-form" style="display:none;margin-top:7px;border:1px solid var(--linie);padding:8px">
+          <div class="zwei">
+            <div class="feld"><span class="lbl">Name der neuen Art</span><input id="fa-name" placeholder="z. B. Schatz"></div>
+            <div class="feld"><span class="lbl">Farbe</span><input type="color" id="fa-farbe" value="#7b8288" style="height:34px;padding:2px"></div>
+          </div>
+          <div class="feld"><span class="lbl">Symbol (1–2 Zeichen)</span><input id="fa-symbol" maxlength="2" placeholder="★"></div>
+          <button type="button" class="btn" id="fa-ok">Anlegen</button>
+        </div></div></div>
+    <div class="feld"><span class="lbl">Name</span><input id="f-name" value="${esc(t.name)}"></div>
+    <div class="feld"><span class="lbl">Ausgänge</span>
+      <div class="reihe">${AUSGANGSKANTEN.map(k=>`<button type="button" class="btn ${t.ausgaenge.includes(k)?"an-toggle":""}"
+        data-kante="${k}">Kante ${k}</button>`).join("")}</div>
+      <div class="hinweis" style="margin-top:5px" id="f-typ">Typ ${typVon(t.ausgaenge).t} · ${typVon(t.ausgaenge).name}</div></div>
+    <div class="feld"><span class="lbl">Rückseite</span><textarea id="f-rueck">${esc(t.rueck||"")}</textarea></div>
+    <div class="feld"><span class="lbl">Grafik</span>
+      <div class="reihe"><label class="btn">Bild wählen<input type="file" accept="image/*" hidden id="f-img"></label>
+      ${URLS[t.id]?`<button class="btn" type="button" id="f-imgdel">Grafik entfernen</button>`:""}</div>
+      <div id="f-vor" style="margin-top:7px">${URLS[t.id]?`<img src="${URLS[t.id]}" style="max-width:120px;border:1px solid var(--linie)">`:""}</div></div>
+    <div class="reihe" style="margin-top:12px">
+      <button class="btn" id="f-ok">Sichern</button><button class="btn" id="f-ab">Abbrechen</button>
+      ${neu?"":`<button class="btn" id="f-del" style="margin-left:auto;border-color:var(--kampf)">Löschen</button>`}</div>`;
+  let ausg=[...t.ausgaenge];
+  box.querySelectorAll("[data-kante]").forEach(b=>b.onclick=()=>{
+    const k=+b.dataset.kante;
+    ausg=ausg.includes(k)?ausg.filter(x=>x!==k):[...ausg,k];
+    b.classList.toggle("an-toggle");
+    box.querySelector("#f-typ").textContent="Typ "+typVon(ausg).t+" · "+typVon(ausg).name;});
+  box.querySelector("#f-img").onchange=async e=>{
+    const file=e.target.files[0];if(!file)return;
+    const zid=box.querySelector("#f-id").value.trim();
+    if(!zid){meldung("Erst eine ID vergeben, dann die Grafik.");return;}
+    await grafikSetzen(zid,file);
+    box.querySelector("#f-vor").innerHTML=`<img src="${URLS[zid]}" style="max-width:120px;border:1px solid var(--linie)">`;};
+  const idel=box.querySelector("#f-imgdel");
+  if(idel) idel.onclick=async()=>{await imgDel(t.id);
+    if(URLS[t.id]){URL.revokeObjectURL(URLS[t.id]);delete URLS[t.id];}
+    box.querySelector("#f-vor").innerHTML="";idel.remove();render();};
+  box.querySelector("#f-art-neu").onclick=()=>{
+    const p=box.querySelector("#f-art-form"); p.style.display=p.style.display==="none"?"block":"none";};
+  box.querySelector("#fa-ok").onclick=()=>{
+    const name=box.querySelector("#fa-name").value.trim();
+    if(!name){meldung("Erst einen Namen für die neue Art vergeben.");return;}
+    let id=name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"");
+    if(!id) id="typ";
+    let eindeutig=id,n=2; while(S.arten.some(a=>a.id===eindeutig)){eindeutig=id+n;n++;}
+    const neueArt={id:eindeutig,name,farbe:box.querySelector("#fa-farbe").value,
+      symbol:box.querySelector("#fa-symbol").value.trim()};
+    S.arten.push(neueArt);speichern();
+    const sel=box.querySelector("#f-art");
+    sel.innerHTML=S.arten.map(a=>`<option value="${a.id}" ${a.id===neueArt.id?"selected":""}>${esc(a.name)}</option>`).join("");
+    box.querySelector("#f-art-form").style.display="none";
+    box.querySelector("#fa-name").value="";box.querySelector("#fa-symbol").value="";};
+  box.querySelector("#f-ab").onclick=()=>dlg().close();
+  const dl=box.querySelector("#f-del");
+  if(dl) dl.onclick=()=>{if(!confirm("Plättchen "+t.id+" löschen?"))return;
+    S.plaettchen=S.plaettchen.filter(x=>x.id!==t.id);
+    S.stufen.forEach(L=>L.sack=L.sack.filter(x=>x!==t.id));
+    S.bretter.forEach(F=>{for(const z of Object.values(F.zellen)) if(z.plaettchen===t.id) delete z.plaettchen;});
+    imgDel(t.id);dlg().close();speichern();render();};
+  box.querySelector("#f-ok").onclick=()=>{
+    const nid=box.querySelector("#f-id").value.trim();
+    if(!nid){meldung("Ohne ID geht es nicht.");return;}
+    if(neu&&byId(nid)){meldung("Die ID "+nid+" gibt es schon.");return;}
+    const daten={id:nid,name:box.querySelector("#f-name").value.trim()||nid,
+      art:box.querySelector("#f-art").value,ausgaenge:[...ausg].sort((a,b)=>a-b),
+      v:t.v||"A",rueck:box.querySelector("#f-rueck").value};
+    if(neu) S.plaettchen.push(daten); else Object.assign(byId(t.id),daten);
+    dlg().close();speichern();render();};
+  dlg().showModal();
+}
+
+function dialogBrett(id){
+  const neu=!id;
+  const F=neu?{id:"F"+(S.bretter.length+1),name:"Neues Brett",breite:7,hoehe:6,zellen:{}}:{...brettById(id)};
+  const box=dbox();
+  box.innerHTML=`<div class="lbl" style="margin-bottom:10px">${neu?"Neues Brett":"Brett-Einstellungen"}</div>
+    <div class="feld"><span class="lbl">Name</span><input id="b-name" value="${esc(F.name)}"></div>
+    <div class="zwei">
+      <div class="feld"><span class="lbl">Breite (Spalten)</span><input id="b-b" type="number" min="1" max="20" value="${F.breite}"></div>
+      <div class="feld"><span class="lbl">Höhe (Zeilen)</span><input id="b-h" type="number" min="1" max="20" value="${F.hoehe}"></div></div>
+    <div class="hinweis" style="margin-bottom:10px">
+      Breite und Höhe gelten nur für die Formknöpfe „Raster füllen“ und „Sanduhr“.
+      Einzelne Felder schaltest du danach direkt auf dem Brett an und aus.</div>
+    <div class="reihe"><button class="btn" id="b-ok">Sichern</button>
+      <button class="btn" id="b-ab">Abbrechen</button>
+      ${neu||S.bretter.length<2?"":`<button class="btn" id="b-del" style="margin-left:auto;border-color:var(--kampf)">Löschen</button>`}</div>`;
+  box.querySelector("#b-ab").onclick=()=>dlg().close();
+  const dl=box.querySelector("#b-del");
+  if(dl) dl.onclick=()=>{
+    if(S.stufen.some(s=>s.brettId===F.id)){meldung("Dieses Brett wird von einer Stufe benutzt. Erst dort umstellen.");return;}
+    if(!confirm("Brett löschen?"))return;
+    S.bretter=S.bretter.filter(x=>x.id!==F.id);EDIT.brettId=S.bretter[0].id;
+    dlg().close();speichern();render();};
+  box.querySelector("#b-ok").onclick=()=>{
+    const daten={name:box.querySelector("#b-name").value.trim()||F.id,
+      breite:Math.max(1,+box.querySelector("#b-b").value||7),
+      hoehe:Math.max(1,+box.querySelector("#b-h").value||6)};
+    if(neu){
+      const z=rasterZellen(daten.breite,daten.hoehe);
+      z[untersteZelle(z)]={rolle:"start",plaettchen:"S01"};
+      S.bretter.push({id:F.id,...daten,zellen:z});
+      EDIT.brettId=F.id;
+    }else Object.assign(brettById(F.id),daten);
+    dlg().close();speichern();render();};
+  dlg().showModal();
+}
+
+function dialogStartkarte(){
+  const F=brettById(EDIT.brettId);
+  const s=Object.entries(F.zellen).find(([,z])=>z.rolle==="start");
+  if(!s){meldung("Setze erst ein Startfeld auf dem Brett.");return;}
+  const box=dbox();
+  box.innerHTML=`<div class="lbl" style="margin-bottom:10px">Startplättchen</div>
+    <div class="feld"><select id="sk">${S.plaettchen.map(t=>
+      `<option value="${t.id}" ${s[1].plaettchen===t.id?"selected":""}>${esc(t.id+" · "+t.name)}</option>`).join("")}</select></div>
+    <div class="reihe"><button class="btn" id="sk-ok">Sichern</button>
+      <button class="btn" onclick="document.getElementById('dlg').close()">Abbrechen</button></div>`;
+  box.querySelector("#sk-ok").onclick=()=>{
+    F.zellen[s[0]].plaettchen=box.querySelector("#sk").value;
+    dlg().close();speichern();render();};
+  dlg().showModal();
+}
+
+function dialogStufe(id){
+  const neu=!id;
+  const L=neu?{id:"L"+(S.stufen.length+1),name:"Neue Stufe",brettId:S.bretter[0].id,sack:[],
+               sackgroesse:0,zieh:3,notiz:""}:{...stufeById(id)};
+  let sack=[...L.sack];
+  const box=dbox();
+  box.innerHTML=`<div class="lbl" style="margin-bottom:10px">${neu?"Neue Stufe":"Stufe ändern"}</div>
+    <div class="feld"><span class="lbl">Name</span><input id="s-name" value="${esc(L.name)}"></div>
+    <div class="feld"><span class="lbl">Brett</span><select id="s-brett">
+      ${S.bretter.map(b=>`<option value="${b.id}" ${L.brettId===b.id?"selected":""}>${esc(b.name)}</option>`).join("")}</select></div>
+    <div class="zwei">
+      <div class="feld"><span class="lbl">Sackgröße (0 = alle)</span><input id="s-groesse" type="number" min="0" value="${L.sackgroesse||0}"></div>
+      <div class="feld"><span class="lbl">Je Ausgang aufdecken</span><input id="s-zieh" type="number" min="1" max="6" value="${L.zieh||3}"></div></div>
+    <div class="feld"><span class="lbl">Notiz</span><textarea id="s-notiz">${esc(L.notiz||"")}</textarea></div>
+    <div class="feld"><span class="lbl">Im Sack · <span id="s-zahl">${sack.length}</span></span>
+      <div class="reihe" style="margin:5px 0 7px">
+        <button type="button" class="btn" id="s-alle">Alle</button>
+        <button type="button" class="btn" id="s-keine">Keine</button>
+        <button type="button" class="btn" id="s-a">Nur Variante A</button></div>
+      <div style="max-height:190px;overflow-y:auto;border:1px solid var(--linie);padding:7px">
+        ${S.plaettchen.map(t=>`<label style="display:flex;gap:7px;align-items:center;padding:3px 0;font-size:13px">
+          <input type="checkbox" data-sid="${t.id}" ${sack.includes(t.id)?"checked":""} style="width:auto">
+          <span style="color:${artFarbe(t.art)}">${artSymbol(t.art)||""}</span> ${esc(t.id)} · ${esc(t.name)}</label>`).join("")}
+      </div></div>
+    <div class="reihe" style="margin-top:12px"><button class="btn" id="s-ok">Sichern</button>
+      <button class="btn" id="s-ab">Abbrechen</button>
+      ${neu||S.stufen.length<2?"":`<button class="btn" id="s-del" style="margin-left:auto;border-color:var(--kampf)">Löschen</button>`}</div>`;
+  const boxen=[...box.querySelectorAll("[data-sid]")];
+  const sync=()=>{sack=boxen.filter(b=>b.checked).map(b=>b.dataset.sid);
+    box.querySelector("#s-zahl").textContent=sack.length;};
+  boxen.forEach(b=>b.onchange=sync);
+  box.querySelector("#s-alle").onclick=()=>{boxen.forEach(b=>b.checked=true);sync();};
+  box.querySelector("#s-keine").onclick=()=>{boxen.forEach(b=>b.checked=false);sync();};
+  box.querySelector("#s-a").onclick=()=>{boxen.forEach(b=>{const t=byId(b.dataset.sid);
+    b.checked=t&&t.v==="A"&&!["S01","B01"].includes(t.id);});sync();};
+  box.querySelector("#s-ab").onclick=()=>dlg().close();
+  const dl=box.querySelector("#s-del");
+  if(dl) dl.onclick=()=>{if(!confirm("Stufe löschen?"))return;
+    S.stufen=S.stufen.filter(x=>x.id!==L.id);dlg().close();speichern();render();};
+  box.querySelector("#s-ok").onclick=()=>{
+    const daten={id:L.id,name:box.querySelector("#s-name").value.trim()||L.id,
+      brettId:box.querySelector("#s-brett").value,sack,
+      sackgroesse:+box.querySelector("#s-groesse").value||0,
+      zieh:+box.querySelector("#s-zieh").value||3,notiz:box.querySelector("#s-notiz").value};
+    if(neu) S.stufen.push(daten); else Object.assign(stufeById(L.id),daten);
+    dlg().close();speichern();render();};
+  dlg().showModal();
+}
+
+function dialogKampagne(id){
+  const neu=!id;
+  const bestehende=neu?null:kampagneById(id);
+  const K=neu?{id:"C"+(S.kampagnen.length+1),name:"Neue Kampagne",
+      level:[{brettId:S.bretter[0].id,sackgroesse:0,zieh:3,notiz:""}],freischaltung:{}}
+    :{id:bestehende.id,name:bestehende.name,
+      level:bestehende.level.map(l=>({...l})),freischaltung:{...bestehende.freischaltung}};
+  const box=dbox();
+  const tauglich=S.plaettchen.filter(t=>!["S01","B01"].includes(t.id));
+
+  function levelHtml(){
+    return K.level.map((lvl,i)=>`
+      <div class="reihe" style="align-items:center;margin-bottom:4px">
+        <span class="lbl" style="width:16px">${i+1}</span>
+        <select data-lvl-brett="${i}" style="flex:1">
+          ${S.bretter.map(b=>`<option value="${b.id}" ${lvl.brettId===b.id?"selected":""}>${esc(b.name)}</option>`).join("")}
+        </select>
+        <input data-lvl-groesse="${i}" type="number" min="0" value="${lvl.sackgroesse||0}" title="Sackgröße (0=alle)" style="width:52px">
+        <input data-lvl-zieh="${i}" type="number" min="1" max="6" value="${lvl.zieh||3}" title="Ziehen" style="width:44px">
+        <button type="button" class="btn" data-lvl-hoch="${i}" ${i===0?"disabled":""}>↑</button>
+        <button type="button" class="btn" data-lvl-runter="${i}" ${i===K.level.length-1?"disabled":""}>↓</button>
+        <button type="button" class="btn" data-lvl-loeschen="${i}" ${K.level.length<=1?"disabled":""} style="border-color:var(--kampf)">✕</button>
+      </div>
+      <input data-lvl-notiz="${i}" value="${esc(lvl.notiz||"")}" placeholder="Notiz zu Level ${i+1}" style="margin:0 0 10px">`).join("");
+  }
+  function verdrahteLevel(){
+    box.querySelector("#k-level-zahl").textContent=K.level.length;
+    box.querySelectorAll("[data-lvl-brett]").forEach(s=>s.onchange=()=>{K.level[+s.dataset.lvlBrett].brettId=s.value;});
+    box.querySelectorAll("[data-lvl-groesse]").forEach(i=>i.onchange=()=>{K.level[+i.dataset.lvlGroesse].sackgroesse=+i.value||0;});
+    box.querySelectorAll("[data-lvl-zieh]").forEach(i=>i.onchange=()=>{K.level[+i.dataset.lvlZieh].zieh=+i.value||3;});
+    box.querySelectorAll("[data-lvl-notiz]").forEach(i=>i.onchange=()=>{K.level[+i.dataset.lvlNotiz].notiz=i.value;});
+    box.querySelectorAll("[data-lvl-hoch]").forEach(b=>b.onclick=()=>{
+      const i=+b.dataset.lvlHoch; if(i>0){[K.level[i-1],K.level[i]]=[K.level[i],K.level[i-1]];zeichneLevel();}});
+    box.querySelectorAll("[data-lvl-runter]").forEach(b=>b.onclick=()=>{
+      const i=+b.dataset.lvlRunter; if(i<K.level.length-1){[K.level[i+1],K.level[i]]=[K.level[i],K.level[i+1]];zeichneLevel();}});
+    box.querySelectorAll("[data-lvl-loeschen]").forEach(b=>b.onclick=()=>{
+      const i=+b.dataset.lvlLoeschen; if(K.level.length<=1)return;
+      K.level.splice(i,1);
+      for(const pid of Object.keys(K.freischaltung)){
+        if(K.freischaltung[pid]>i+1) K.freischaltung[pid]--;
+        else if(K.freischaltung[pid]===i+1) K.freischaltung[pid]=Math.max(1,i);
+      }
+      zeichneLevel();zeichneFrei();});
+  }
+  function zeichneLevel(){box.querySelector("#k-level-liste").innerHTML=levelHtml();verdrahteLevel();}
+
+  function freiHtml(){
+    return tauglich.map(t=>`<label style="display:flex;gap:7px;align-items:center;padding:3px 0;font-size:13px">
+      <span style="color:${artFarbe(t.art)};width:14px">${artSymbol(t.art)||""}</span>
+      <span style="flex:1">${esc(t.id)} · ${esc(t.name)}</span>
+      <input type="number" min="0" data-frei="${t.id}" value="${K.freischaltung[t.id]||0}" style="width:52px;text-align:center"></label>`).join("");
+  }
+  function zeichneFrei(){
+    box.querySelector("#k-frei-liste").innerHTML=freiHtml();
+    box.querySelectorAll("[data-frei]").forEach(i=>i.onchange=()=>{
+      const w=Math.max(0,+i.value||0);
+      if(w<=0) delete K.freischaltung[i.dataset.frei]; else K.freischaltung[i.dataset.frei]=w;});
+  }
+
+  box.innerHTML=`<div class="lbl" style="margin-bottom:10px">${neu?"Neue Kampagne":"Kampagne ändern"}</div>
+    <div class="feld"><span class="lbl">Name</span><input id="k-name" value="${esc(K.name)}"></div>
+    <div class="lbl" style="margin:14px 0 6px">Level · <span id="k-level-zahl">${K.level.length}</span></div>
+    <div id="k-level-liste"></div>
+    <button type="button" class="btn" id="k-level-neu">＋ Level</button>
+    <div class="trenner"></div>
+    <div class="lbl" style="margin-bottom:6px">Plättchen-Freischaltung · ab welchem Level verfügbar (0 = nicht dabei)</div>
+    <div id="k-frei-liste" style="max-height:220px;overflow-y:auto;border:1px solid var(--linie);padding:7px"></div>
+    <div class="reihe" style="margin-top:12px"><button class="btn" id="k-ok">Sichern</button>
+      <button class="btn" id="k-ab">Abbrechen</button>
+      ${neu?"":`<button class="btn" id="k-del" style="margin-left:auto;border-color:var(--kampf)">Löschen</button>`}</div>`;
+  zeichneLevel();zeichneFrei();
+  box.querySelector("#k-level-neu").onclick=()=>{
+    K.level.push({brettId:S.bretter[0].id,sackgroesse:0,zieh:3,notiz:""});zeichneLevel();};
+  box.querySelector("#k-ab").onclick=()=>dlg().close();
+  const dl=box.querySelector("#k-del");
+  if(dl) dl.onclick=()=>{if(!confirm("Kampagne löschen?"))return;
+    S.kampagnen=S.kampagnen.filter(x=>x.id!==K.id);dlg().close();speichern();render();};
+  box.querySelector("#k-ok").onclick=()=>{
+    const daten={id:K.id,name:box.querySelector("#k-name").value.trim()||K.id,
+      level:K.level,freischaltung:K.freischaltung};
+    if(neu) S.kampagnen.push(daten); else Object.assign(kampagneById(K.id),daten);
+    dlg().close();speichern();render();};
+  dlg().showModal();
+}
+
+/* ============================================================
+   Grafiken · Export · Import
+   ============================================================ */
+async function grafikSetzen(id,file){
+  try{await imgSet(id,file);
+    if(URLS[id])URL.revokeObjectURL(URLS[id]);
+    URLS[id]=URL.createObjectURL(file);}
+  catch(e){meldung("Grafik konnte nicht gespeichert werden: "+e.message);}
+}
+async function sammelImport(files){
+  let ok=0;const fehlt=[];
+  for(const f of files){const id=f.name.replace(/\.[^.]+$/,"").trim();
+    if(byId(id)){await grafikSetzen(id,f);ok++;}else fehlt.push(f.name);}
+  render();meldung(ok+" Grafik(en) zugeordnet."+(fehlt.length?" Ohne passende ID: "+fehlt.join(", "):""));
+}
+const blobZuBase64=b=>new Promise((res,rej)=>{const r=new FileReader();
+  r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(b);});
+async function exportieren(){
+  const bilder={};
+  try{for(const k of await imgKeys()){const b=await imgGet(k);if(b)bilder[k]=await blobZuBase64(b);}}catch(e){}
+  const daten={format:"spiegelreich-pfad",version:2,zeit:new Date().toISOString(),
+    plaettchen:S.plaettchen,bretter:S.bretter,stufen:S.stufen,lauf:S.lauf,
+    spieler:S.spieler,spielerAnzahl:S.spielerAnzahl,kampagnen:S.kampagnen,arten:S.arten,bilder};
+  const b=new Blob([JSON.stringify(daten)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);
+  a.download="spiegelreich_pfad_"+new Date().toISOString().slice(0,10)+".json";
+  a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+async function importieren(file){
+  try{
+    const d=JSON.parse(await file.text());
+    if(!d.plaettchen) throw new Error("Keine Plättchen in der Datei.");
+    S.plaettchen=d.plaettchen;
+    S.bretter=(d.bretter&&d.bretter.length)?d.bretter:saatBretter();
+    S.stufen=(d.stufen&&d.stufen.length)?d.stufen:saatStufen(S.plaettchen,S.bretter);
+    S.stufen.forEach(st=>{if(!brettById(st.brettId))st.brettId=S.bretter[0].id;});
+    S.lauf=d.lauf&&d.lauf.brett?d.lauf:neuerLauf(S.stufen[0].id);
+    S.spieler=(d.spieler&&d.spieler.length===4)?d.spieler:standardSpieler();
+    S.spielerAnzahl=d.spielerAnzahl||2;
+    S.kampagnen=d.kampagnen||[];
+    S.arten=(d.arten&&d.arten.length)?d.arten:standardArten();
+    EDIT.brettId=S.bretter[0].id;
+    if(d.bilder) for(const [id,du] of Object.entries(d.bilder)){
+      const b=await (await fetch(du)).blob();await imgSet(id,b);
+      if(URLS[id])URL.revokeObjectURL(URLS[id]);URLS[id]=URL.createObjectURL(b);}
+    await speichern();zentrieren();render();
+    meldung("Import fertig: "+S.plaettchen.length+" Plättchen, "+S.bretter.length+" Bretter.");
+  }catch(e){meldung("Import fehlgeschlagen: "+e.message);}
+}
+
+/* ============================================================
+   Brett bearbeiten
+   ============================================================ */
+function zelleTippen(k){
+  const F=brettById(EDIT.brettId);
+  const z=F.zellen[k];
+  if(EDIT.pinsel==="an"){ if(!z) F.zellen[k]={rolle:"frei"}; }
+  else if(EDIT.pinsel==="aus"){ if(z) delete F.zellen[k]; }
+  else if(EDIT.pinsel==="start"){
+    for(const [kk,zz] of Object.entries(F.zellen)) if(zz.rolle==="start") F.zellen[kk]={rolle:"frei"};
+    const alt=F.zellen[k];
+    F.zellen[k]={rolle:"start",plaettchen:(alt&&alt.plaettchen)||"S01"};
+  }
+  else if(EDIT.pinsel==="fest"){
+    if(z&&z.rolle==="fest"&&z.plaettchen===EDIT.festId) F.zellen[k]={rolle:"frei"};
+    else F.zellen[k]={rolle:"fest",plaettchen:EDIT.festId};
+  }
+  speichern();render();
+}
+
+
+function startPlaettchenName(F){
+  const s=Object.values(F.zellen).find(z=>z.rolle==="start");
+  const t=s&&byId(s.plaettchen);
+  return t?t.id+" · "+t.name:"nicht gesetzt";
+}
+
+function dialogDaten(){
+  const mitBild=S.plaettchen.filter(t=>URLS[t.id]).length;
+  dbox().innerHTML=`<div class="lbl" style="margin-bottom:12px">Daten und Sicherung</div>
+    <div class="reihe" style="margin-bottom:7px">
+      <button class="btn" data-akt="export">Alles exportieren</button>
+      <label class="btn">Importieren<input type="file" accept="application/json" hidden id="impjson"></label>
+    </div>
+    <div class="fuehrung" style="margin-bottom:16px">
+      Eine Datei mit Plättchen, Brettern, Stufen, dem laufenden Weg und allen Grafiken.
+      Das ist die echte Sicherung — der Browserspeicher ist keine.</div>
+    <table class="stand" style="margin-bottom:16px">
+      <tr><td>Plättchen</td><td>${S.plaettchen.length} · ${mitBild} mit Grafik</td></tr>
+      <tr><td>Bretter</td><td>${S.bretter.length}</td></tr>
+      <tr><td>Stufen</td><td>${S.stufen.length}</td></tr>
+      <tr><td>Speicher</td><td id="quota">wird geprüft …</td></tr>
+    </table>
+    <div class="lbl" style="margin-bottom:6px">Zurücksetzen</div>
+    <div class="reihe">
+      <button class="btn" data-akt="reset-plaettchen">Plättchen auf v1.2</button>
+      <button class="btn" style="border-color:var(--kampf)" data-akt="reset-alles">Alles löschen</button>
+      <button class="btn" style="margin-left:auto" onclick="document.getElementById('dlg').close()">Schließen</button>
+    </div>`;
+  const box=dbox();
+  box.querySelectorAll("[data-akt]").forEach(b=>b.onclick=()=>aktion(b.dataset.akt));
+  const imp=box.querySelector("#impjson");
+  if(imp) imp.onchange=e=>{if(e.target.files[0]){dlg().close();importieren(e.target.files[0]);}};
+  const q=box.querySelector("#quota");
+  if(navigator.storage&&navigator.storage.estimate)
+    navigator.storage.estimate().then(r=>{const mb=n=>(n/1048576).toFixed(1)+" MB";
+      q.textContent=mb(r.usage||0)+" von ~"+mb(r.quota||0);})
+      .catch(()=>q.textContent="nicht abrufbar");
+  else q.textContent="nicht abrufbar";
+  dlg().showModal();
+}
+/* ============================================================
+   Zeichnen
+   ============================================================ */
+const RH=46,HHX=Math.sqrt(3)*RH;
+const pix=(q,r)=>[1.5*RH*q,HHX*(r+q/2)];
+function hexPunkte(cx,cy,rr){
+  return Array.from({length:6},(_,i)=>{const a=Math.PI/180*(60*i);
+    return (cx+rr*Math.cos(a)).toFixed(2)+","+(cy+rr*Math.sin(a)).toFixed(2);}).join(" ");
+}
+function kantenMitte(cx,cy,k){const a=Math.PI/180*WINKEL[k],rr=Math.sqrt(3)/2*RH;
+  return [cx+rr*Math.cos(a),cy+rr*Math.sin(a)];}
+function viewBox(){const W=380,H=380;
+  return [(ANSICHT.x-W/2*ANSICHT.k),(ANSICHT.y-H/2*ANSICHT.k),(W*ANSICHT.k),(H*ANSICHT.k)]
+    .map(n=>n.toFixed(1)).join(" ");}
+
+function zeichnePlaettchen(x,y,t,ist,von,offenPruef){
+  let g="";
+  if(URLS[t.id]){
+    const cid="c"+x.toFixed(0).replace("-","m")+"_"+y.toFixed(0).replace("-","m");
+    g+=`<clipPath id="${cid}"><polygon points="${hexPunkte(x,y,RH)}"/></clipPath>`
+     +`<image href="${URLS[t.id]}" x="${x-RH}" y="${y-HHX/2}" width="${2*RH}" height="${HHX}"
+        preserveAspectRatio="xMidYMid slice" clip-path="url(#${cid})"/>`;
+  }else g+=`<polygon points="${hexPunkte(x,y,RH)}" fill="${ist?"#1c2226":"#14181b"}"/>`;
+  const farbe=artFarbe(t.art)||"#888";
+  g+=`<polygon points="${hexPunkte(x,y,RH)}" fill="none" stroke="${ist?farbe:"#2c3236"}" stroke-width="${ist?2.6:1}"/>`;
+  if(von!=null){const [mx,my]=kantenMitte(x,y,von);
+    g+=`<line x1="${x}" y1="${y}" x2="${mx}" y2="${my}" stroke="#7d8489" stroke-width="3" stroke-linecap="round"/>`;}
+  for(const e of t.ausgaenge){
+    const [mx,my]=kantenMitte(x,y,e), offen=offenPruef?offenPruef(e):true;
+    g+=`<line x1="${x}" y1="${y}" x2="${mx}" y2="${my}" stroke="${offen?farbe:"#565c60"}"
+        stroke-width="3" stroke-linecap="round" ${offen?"":'stroke-dasharray="4 4"'}/>`;
+  }
+  if(!URLS[t.id]){
+    g+=`<circle cx="${x}" cy="${y}" r="13" fill="${farbe}" opacity="${ist?1:.75}"/>`
+     +`<text x="${x}" y="${y+5}" text-anchor="middle" font-size="15" fill="#0e1113">${artSymbol(t.art)||""}</text>`;
+  }
+  g+=`<text x="${x}" y="${y+30}" text-anchor="middle" font-size="9" fill="${ist?"#dcd6c9":"#7d8489"}"
+      font-family="ui-monospace,monospace">${esc(t.id)}</text>`;
+  return g;
+}
+
+/* Ausgangsknöpfe direkt auf dem Brett */
+function ausgangsKnoepfe(x,y,t){
+  const L=S.lauf; let g="";
+  for(const e of t.ausgaenge){
+    const [mx,my]=kantenMitte(x,y,e);
+    const px=x+(mx-x)*1.34, py=y+(my-y)*1.34;
+    const {lage}=kantenLage(e);
+    if(lage==="aus"){
+      g+=`<g opacity=".5"><circle cx="${px}" cy="${py}" r="12" fill="#0e1113" stroke="#3a4145"/>
+        <path d="M${px-4} ${py-4}L${px+4} ${py+4}M${px+4} ${py-4}L${px-4} ${py+4}"
+          stroke="#5a6165" stroke-width="1.6"/></g>`;
+      continue;
+    }
+    const ziehbar = lage==="frei" && L.sack.length>0 && !L.angebot && !L.ende;
+    const gehbar  = lage==="belegt" && !L.angebot;
+    const aktiv = ziehbar||gehbar;
+    const fuell = ziehbar?(artFarbe(t.art)||"#888"):"#0e1113";
+    const rand  = gehbar?"#7d8489":(artFarbe(t.art)||"#888");
+    const pfeilfarbe = ziehbar?"#0e1113":"#dcd6c9";
+    g+=`<g ${aktiv?`data-exit="${e}" style="cursor:pointer"`:'opacity=".4"'}>
+      <circle cx="${px}" cy="${py}" r="15" fill="${fuell}" stroke="${rand}" stroke-width="1.8"/>
+      <polygon points="${(px+7).toFixed(1)},${py.toFixed(1)} ${(px-5).toFixed(1)},${(py-5).toFixed(1)} ${(px-5).toFixed(1)},${(py+5).toFixed(1)}"
+        transform="rotate(${WINKEL[e]} ${px.toFixed(1)} ${py.toFixed(1)})" fill="${pfeilfarbe}" pointer-events="none"/></g>`;
+  }
+  return g;
+}
+
+function hintergrundBild(F){
+  const url=URLS["bg_"+F.id]; if(!url) return "";
+  const ks=Object.keys(F.zellen); if(!ks.length) return "";
+  let x0=Infinity,x1=-Infinity,y0=Infinity,y1=-Infinity;
+  for(const k of ks){const [q,r]=zuQR(k),[x,y]=pix(q,r);
+    x0=Math.min(x0,x-RH);x1=Math.max(x1,x+RH);y0=Math.min(y0,y-HHX/2);y1=Math.max(y1,y+HHX/2);}
+  return `<image href="${url}" x="${x0.toFixed(1)}" y="${y0.toFixed(1)}"
+    width="${(x1-x0).toFixed(1)}" height="${(y1-y0).toFixed(1)}"
+    preserveAspectRatio="xMidYMid slice"/>`;
+}
+function karteLauf(){
+  const L=S.lauf,F=brettAktiv(),[cq,cr]=L.pos;
+  const bg=hintergrundBild(F);
+  let g=bg;
+  for(const [k,z] of Object.entries(F.zellen)){
+    if(L.brett[k]) continue;
+    const [q,r]=zuQR(k),[x,y]=pix(q,r);
+    g+=`<polygon points="${hexPunkte(x,y,RH)}" fill="${bg?"none":"#101416"}" stroke="${F.gridfarbe||"#1e2326"}" stroke-width="1"/>`;
+    if(z.rolle==="fest") g+=`<text x="${x}" y="${y+4}" text-anchor="middle" font-size="9"
+        fill="#3c4347" font-family="ui-monospace,monospace">${esc(z.plaettchen||"")}</text>`;
+  }
+  const rueckSet=RUECKLAUF?new Set(rueckZiele().map(z=>z.k)):null;
+  let oben="";
+  for(const [k,f] of Object.entries(L.brett)){
+    const [q,r]=zuQR(k),[x,y]=pix(q,r),t=byId(f.id); if(!t) continue;
+    const ist=q===cq&&r===cr;
+    const stueck=zeichnePlaettchen(x,y,t,ist,f.von,e=>{
+      const [dq,dr]=DIR[e],nk=key(q+dq,r+dr); return aufBrett(nk)&&!L.brett[nk];});
+    const ring=rueckSet&&rueckSet.has(k)
+      ?`<polygon points="${hexPunkte(x,y,RH+4)}" fill="none" stroke="#c9a227" stroke-width="2.4" stroke-dasharray="5 3"/>`:"";
+    if(ist) oben=`<g data-feld="${k}" style="cursor:pointer">${stueck}${ring}${ausgangsKnoepfe(x,y,t)}</g>`;
+    else g+=`<g data-feld="${k}" style="cursor:pointer">${stueck}${ring}</g>`;
+  }
+  return `<svg viewBox="${viewBox()}" id="svg">${g}${oben}</svg>`;
+}
+
+function karteEditor(){
+  const F=brettById(EDIT.brettId)||S.bretter[0];
+  const bg=hintergrundBild(F);
+  let g=bg;
+  for(const k of erweiterung(F)){
+    const [q,r]=zuQR(k),[x,y]=pix(q,r);
+    g+=`<polygon data-k="${k}" points="${hexPunkte(x,y,RH)}" style="cursor:pointer"
+        fill="#0c0f10" stroke="#1a1e21" stroke-width="1" stroke-dasharray="3 5"/>`;
+  }
+  for(const [k,z] of Object.entries(F.zellen)){
+    const [q,r]=zuQR(k),[x,y]=pix(q,r);
+    const t=z.plaettchen?byId(z.plaettchen):null;
+    const umriss=z.rolle==="start"?"#5f8a72":z.rolle==="fest"?"#c9a227":(F.gridfarbe||"#39403f");
+    const flaeche=bg?"none":(z.rolle==="frei"?"#14181b":"#191e21");
+    g+=`<g><polygon data-k="${k}" points="${hexPunkte(x,y,RH)}" style="cursor:pointer"
+        fill="${flaeche}" stroke="${umriss}" stroke-width="${z.rolle==="frei"?1:2.4}"/>`;
+    if(z.rolle==="start") g+=`<text x="${x}" y="${y-3}" text-anchor="middle" font-size="10" fill="#5f8a72"
+        font-family="ui-monospace,monospace" pointer-events="none">START</text>`;
+    if(z.rolle==="fest") g+=`<text x="${x}" y="${y-3}" text-anchor="middle" font-size="10" fill="#c9a227"
+        font-family="ui-monospace,monospace" pointer-events="none">FEST</text>`;
+    if(t) g+=`<text x="${x}" y="${y+13}" text-anchor="middle" font-size="10" fill="${artFarbe(t.art)}"
+        font-family="ui-monospace,monospace" pointer-events="none">${esc(t.id)}</text>`;
+    g+=`</g>`;
+  }
+  return `<svg viewBox="${viewBox()}" id="svg">${g}</svg>`;
+}
+function erweiterung(F){
+  const s=new Set();
+  for(const k of Object.keys(F.zellen)){
+    const [q,r]=zuQR(k);
+    for(const d of Object.values(DIR)){const nk=key(q+d[0],r+d[1]); if(!F.zellen[nk]) s.add(nk);}
+  }
+  return [...s];
+}
+
+/* ============================================================
+   Oberfläche
+   MODUS "spielen" | "bauen" · BAU "brett" | "plaettchen" | "stufen"
+   ============================================================ */
+let MODUS="spielen", BAU="brett", SCHUBLADE=true;
+
+function kopf(){
+  const L=S.lauf;
+  const rechts = MODUS==="spielen"
+    ? `<span class="zahl">${L.sack.length}<i>Sack</i></span>
+       <span class="zahl">${Object.keys(L.brett).length}<i>Räume</i></span>
+       <span class="zahl" style="color:var(--kampf)">${stufeText(L.scharmuetzel)}<i>Stufe</i></span>`
+    : MODUS==="spieler"
+    ? `<span class="zahl">${S.spielerAnzahl}<i>Spieler</i></span>`
+    : `<span class="zahl">${S.bretter.length}<i>Bretter</i></span>
+       <span class="zahl">${S.plaettchen.length}<i>Plättchen</i></span>
+       <span class="zahl">${S.stufen.length}<i>Stufen</i></span>`;
+  return `<div class="marke">SPIEGELREICH<i>Pfad</i></div>
+    <div class="wippe">
+      <button data-modus="spielen" class="${MODUS==="spielen"?"an":""}">Spielen</button>
+      <button data-modus="spieler" class="${MODUS==="spieler"?"an":""}">Spieler</button>
+      <button data-modus="bauen" class="${MODUS==="bauen"?"an":""}">Bauen</button>
+    </div>
+    <div class="stat">${rechts}</div>
+    <button class="ikon" data-akt="daten" title="Daten und Sicherung">≡</button>`;
+}
+
+/* ---------- Spielen ---------- */
+function paneelSpielen(){
+  const L=S.lauf,hier=key(L.pos[0],L.pos[1]),f=L.brett[hier],t=f?byId(f.id):null;
+  if(!t) return `<div class="warn">Auf dem Startfeld liegt kein gültiges Plättchen. Prüfe das Brett unter „Bauen“.</div>`;
+  const zl=rueckZiele();
+  const lagen=t.ausgaenge.map(k=>({k,...kantenLage(k)}));
+  const frei=lagen.filter(l=>l.lage==="frei").length;
+  return `
+    <div class="kopfzeile">
+      <span class="pkt" style="background:${artFarbe(t.art)}"></span>
+      <strong>${esc(t.name)}</strong>
+      <span class="lbl">${esc(t.id)} · ${typVon(t.ausgaenge).name}</span>
+    </div>
+    <p class="text">${esc(t.rueck||"")}</p>
+    ${L.ende?`<div class="banner">${esc(L.ende)}</div>`:""}
+    <div class="fuehrung">${
+      L.ende ? "Der Lauf ist zu Ende."
+      : L.angebot ? "Wähle eines der drei Plättchen. Ein Zurück gibt es nicht."
+      : frei ? "Tippe auf dem Brett einen Ausgang an."
+      : t.ausgaenge.length ? "Kein freier Ausgang. Lauf zurück."
+      : "Sackgasse. Lauf zurück oder beende den Lauf."}</div>
+    <div class="reihe">
+      <button class="btn" data-akt="rueck" ${zl.length&&!L.angebot?"":"disabled"}>Zurücklaufen</button>
+      <button class="btn" data-akt="undo" ${VORHER.length?"":"disabled"}>Undo</button>
+      <button class="btn" data-akt="neu">Neuer Lauf</button>
+    </div>
+    <div class="trenner"></div>
+    <div class="lbl">Stand</div>
+    <table class="stand">
+      <tr><td>Stufe</td><td>${esc(laufKontext().name)}</td></tr>
+      <tr><td>Brett</td><td>${esc(brettAktiv().name)} · ${Object.keys(L.brett).length} von ${Object.keys(brettAktiv().zellen).length}</td></tr>
+      <tr><td>Sack</td><td>${L.sack.length} · Ablage ${L.ablage.length}</td></tr>
+      <tr><td>Scharmützel</td><td>${L.scharmuetzel} · ${stufeText(L.scharmuetzel)}</td></tr>
+    </table>
+    <div class="verlauf">${L.log.slice(0,6).map(z=>`<div>${esc(z)}</div>`).join("")}</div>`;
+}
+
+function vorschauPlaettchen(t){
+  const cx=52,cy=52,r=38;
+  const pts=Array.from({length:6},(_,i)=>{const a=Math.PI/180*(60*i);
+    return (cx+r*Math.cos(a)).toFixed(1)+","+(cy+r*Math.sin(a)).toFixed(1);}).join(" ");
+  const farbe=artFarbe(t.art);
+  const bild=URLS[t.id];
+  let pfeile="";
+  for(const e of t.ausgaenge){
+    const a=Math.PI/180*WINKEL[e];
+    const mx=cx+r*0.86*Math.cos(a),my=cy+r*0.86*Math.sin(a);
+    pfeile+=`<polygon points="${(mx+7).toFixed(1)},${my.toFixed(1)} ${(mx-5).toFixed(1)},${(my-5).toFixed(1)} ${(mx-5).toFixed(1)},${(my+5).toFixed(1)}"
+      transform="rotate(${WINKEL[e]} ${mx.toFixed(1)} ${my.toFixed(1)})" fill="${farbe}"/>`;
+  }
+  const innen=bild
+    ?`<clipPath id="vk-${t.id}"><polygon points="${pts}"/></clipPath>
+      <image href="${bild}" x="${cx-r}" y="${cy-r*0.87}" width="${r*2}" height="${r*1.74}"
+        preserveAspectRatio="xMidYMid slice" clip-path="url(#vk-${t.id})"/>`
+    :`<circle cx="${cx}" cy="${cy}" r="14" fill="${farbe}"/>
+      <text x="${cx}" y="${cy+5}" text-anchor="middle" font-size="15" fill="#0e1113">${esc(artSymbol(t.art))}</text>`;
+  return `<svg viewBox="0 0 104 104" width="100%" style="display:block;max-width:110px;margin:0 auto">
+    <polygon points="${pts}" fill="${bild?"none":"#14181b"}" stroke="${farbe}" stroke-width="2"/>
+    ${innen}${pfeile}</svg>`;
+}
+function ueberlagerung(){
+  const L=S.lauf;
+  if(L.angebot){
+    const pfeilKante=`<span style="display:inline-block;transform:rotate(${WINKEL[L.angebot.kante]}deg)">▶</span>`;
+    return `<div class="ueber"><div class="ueber-kopf">
+        <span class="lbl">Ausgang ${pfeilKante} · ziehe ${L.angebot.ids.length}, wähle 1</span>
+        <span class="lbl" style="color:#4d5459">gezogen ist gezogen</span></div>
+      <div class="wahl">${L.angebot.ids.map(id=>{const c=byId(id); if(!c) return "";
+        return `<button class="zug" data-waehl="${c.id}" style="--f:${artFarbe(c.art)}">
+          ${vorschauPlaettchen(c)}
+          <span class="zug-kopf" style="justify-content:center"><strong>${esc(c.name)}</strong></span>
+          <span class="lbl" style="text-align:center">${esc(c.id)} · ${typVon(c.ausgaenge).name}</span></button>`;}).join("")}</div></div>`;
+  }
+  if(RUECKLAUF){
+    const zl=rueckZiele();
+    return `<div class="ueber"><div class="ueber-kopf">
+        <span class="lbl">Rücklauf · Kosten 1 Plättchen aus dem Sack</span>
+        <button class="ikon" data-akt="rueck-ab">✕</button></div>
+      <div class="liste">${zl.length?zl.map(z=>`<button class="zeile" data-rueck="${z.k}">
+        <span class="pkt" style="background:${artFarbe(byId(z.id).art)}"></span>
+        ${esc(byId(z.id).name)}<span class="lbl">${esc(z.id)}</span></button>`).join("")
+        :`<div class="text">Kein Feld mit offenem Ausgang.</div>`}</div></div>`;
+  }
+  return "";
+}
+
+/* ---------- Bauen ---------- */
+function paneelBrett(){
+  const F=brettById(EDIT.brettId)||S.bretter[0];
+  const pinsel=[["an","Feld an"],["aus","Feld aus"],["start","Start"],["fest","Festes Plättchen"]];
+  const fest=Object.values(F.zellen).filter(z=>z.rolle==="fest");
+  return `
+    <div class="feld"><span class="lbl">Brett</span>
+      <div class="reihe">
+        <select id="brettwahl" style="flex:1">${S.bretter.map(b=>
+          `<option value="${b.id}" ${b.id===F.id?"selected":""}>${esc(b.name)}</option>`).join("")}</select>
+        <button class="btn" data-akt="brett-neu">＋</button>
+        <button class="btn" data-akt="brett-einst">⚙</button>
+      </div></div>
+    <div class="lbl" style="margin:12px 0 5px">Pinsel</div>
+    <div class="gitter2">${pinsel.map(([p,n])=>
+      `<button class="btn ${EDIT.pinsel===p?"an-toggle":""}" data-pinsel="${p}">${n}</button>`).join("")}</div>
+    ${EDIT.pinsel==="fest"?`<div class="feld" style="margin-top:9px"><span class="lbl">Welches Plättchen</span>
+      <select id="festwahl">${S.plaettchen.map(t=>
+        `<option value="${t.id}" ${EDIT.festId===t.id?"selected":""}>${esc(t.id+" · "+t.name)}</option>`).join("")}</select>
+      <div class="fuehrung">Nochmal antippen macht das Feld wieder frei.</div></div>`:""}
+    ${EDIT.pinsel==="start"?`<div class="feld" style="margin-top:9px">
+      <div class="fuehrung">Startplättchen: ${esc(startPlaettchenName(F))}</div>
+      <button class="btn" data-akt="startkarte">Startplättchen wählen</button></div>`:""}
+    <div class="trenner"></div>
+    <div class="lbl" style="margin-bottom:6px">Bühnenhintergrund</div>
+    <div class="reihe">
+      <label class="btn">Bild wählen<input type="file" accept="image/*" hidden id="bg-img"></label>
+      ${URLS["bg_"+F.id]?`<button class="btn" type="button" id="bg-del">Entfernen</button>`:""}
+    </div>
+    <div class="zwei" style="margin-top:9px;align-items:center">
+      <span class="lbl">Gridfarbe</span>
+      <input type="color" id="gridfarbe" value="${F.gridfarbe||"#1e2326"}" style="height:34px;padding:2px">
+    </div>
+    <div class="trenner"></div>
+    <div class="lbl">Form vorfüllen</div>
+    <div class="gitter2" style="margin-top:5px">
+      <button class="btn" data-akt="form-raster">Raster</button>
+      <button class="btn" data-akt="form-sanduhr">Sanduhr</button>
+      <button class="btn" data-akt="form-leer">Leeren</button>
+      <button class="btn" data-akt="brett-einst">Maße ändern</button>
+    </div>
+    <div class="trenner"></div>
+    <table class="stand">
+      <tr><td>Felder</td><td>${Object.keys(F.zellen).length}</td></tr>
+      <tr><td>Maße</td><td>${F.breite} × ${F.hoehe}</td></tr>
+      <tr><td>Fest belegt</td><td>${fest.length?fest.map(z=>esc(z.plaettchen)).join(", "):"keine"}</td></tr>
+    </table>
+    <div class="fuehrung">Plättchen liegen nur auf Feldern. Zeigt ein Ausgang über den Rand, ist er gesperrt.</div>`;
+}
+
+function seitePlaettchen(){
+  const gruppen=S.arten.map(a=>({a:a.id,name:a.name,list:S.plaettchen.filter(t=>t.art===a.id)})).filter(g=>g.list.length);
+  return `<div class="seite">
+    <div class="seite-kopf">
+      <div class="lbl">Plättchen · ${S.plaettchen.length}</div>
+      <div class="reihe">
+        <button class="btn" data-akt="neu-plaettchen">＋ Plättchen</button>
+        <label class="btn">Grafiken laden<input type="file" accept="image/*" multiple hidden id="bulkimg"></label>
+      </div></div>
+    <div class="fuehrung">Sammelimport liest den Dateinamen als ID: <code>K01.png</code> landet auf K01.</div>
+    ${gruppen.map(g=>`<div class="lbl" style="margin:18px 0 7px">${esc(g.name)} · ${g.list.length}</div>
+      <div class="gitter">${g.list.map(t=>`
+        <button class="kachel" data-edit="${t.id}" style="--f:${artFarbe(t.art)}">
+          ${URLS[t.id]?`<img src="${URLS[t.id]}" alt="">`
+            :`<span class="platz" style="color:${artFarbe(t.art)}">${artSymbol(t.art)||""}</span>`}
+          <span class="kachel-txt"><strong>${esc(t.name)}</strong>
+            <span class="lbl">${esc(t.id)} · ${typVon(t.ausgaenge).name}</span></span>
+        </button>`).join("")}</div>`).join("")}
+  </div>`;
+}
+
+function seiteStufen(){
+  return `<div class="seite">
+    <div class="seite-kopf">
+      <div class="lbl">Stufen · ${S.stufen.length}</div>
+      <button class="btn" data-akt="neu-stufe">＋ Stufe</button></div>
+    <div class="fuehrung">Eine Stufe verbindet ein Brett mit einem Sack.</div>
+    <div class="gitter">${S.stufen.map(L=>{const F=brettById(L.brettId);
+      return `<div class="kachel breit" style="--f:${(S.lauf.quelle&&S.lauf.quelle.typ==="stufe"&&S.lauf.quelle.id===L.id)?"#c9a227":"#39403f"}">
+        <div style="flex:1;min-width:0">
+          <strong>${esc(L.name)}</strong>
+          <div class="lbl" style="margin-top:3px">${F?esc(F.name):"Brett fehlt"} ·
+            ${L.sack.length} im Sack${L.sackgroesse>0?" · davon "+L.sackgroesse:""} · ziehe ${L.zieh}</div>
+          ${L.notiz?`<div class="text">${esc(L.notiz)}</div>`:""}
+        </div>
+        <div class="reihe">
+          <button class="btn" data-stufe-edit="${L.id}">Ändern</button>
+          <button class="btn" data-stufe-start="${L.id}">Starten</button>
+        </div></div>`;}).join("")}</div>
+  </div>`;
+}
+
+function seiteKampagnen(){
+  return `<div class="seite">
+    <div class="seite-kopf">
+      <div class="lbl">Kampagnen · ${S.kampagnen.length}</div>
+      <button class="btn" data-akt="neu-kampagne">＋ Kampagne</button></div>
+    <div class="fuehrung">Eine Kampagne reiht Level aneinander. Jedes Level nutzt ein Brett aus dem Pool
+      (auch mehrfach) und hat eigene Sackgröße/Ziehen-Werte. Plättchen werden ab einem festgelegten Level
+      automatisch für alle folgenden Level freigeschaltet.</div>
+    <div class="gitter">${S.kampagnen.map(K=>{
+      const laeuftHier=S.lauf.quelle&&S.lauf.quelle.typ==="kampagne"&&S.lauf.quelle.kid===K.id;
+      return `<div class="kachel breit" style="--f:${laeuftHier?"#c9a227":"#39403f"};cursor:default;
+        flex-direction:column;align-items:stretch;gap:8px">
+        <div class="reihe" style="justify-content:space-between">
+          <strong>${esc(K.name)}</strong>
+          <button class="btn" data-kamp-edit="${K.id}">Ändern</button>
+        </div>
+        <div class="lbl">${K.level.length} Level</div>
+        <div class="reihe" style="flex-wrap:wrap">
+          ${K.level.map((lvl,i)=>{const F=brettById(lvl.brettId);
+            const aktiv=laeuftHier&&S.lauf.quelle.lvl===i+1;
+            return `<button class="btn ${aktiv?"an-toggle":""}" data-kamp-start="${K.id}:${i+1}">${i+1} · ${F?esc(F.name):"?"}</button>`;}).join("")}
+        </div>
+      </div>`;}).join("")}</div>
+  </div>`;
+}
+
+/* ---------- Spieler ---------- */
+function spielerZeile(i,feld,label){
+  const p=S.spieler[i];
+  return `<div class="feld"><span class="lbl">${label}</span>
+    <div class="reihe">
+      <button class="btn" data-spwert="${i}:${feld}:-1">−</button>
+      <input type="number" data-spfeld="${i}:${feld}" value="${p[feld]}" style="text-align:center">
+      <button class="btn" data-spwert="${i}:${feld}:1">+</button>
+    </div></div>`;
+}
+function seiteSpieler(){
+  return `<div class="seite">
+    <div class="seite-kopf">
+      <div class="lbl">Spieler · ${S.spielerAnzahl}</div>
+      <div class="reihe">
+        <button class="btn" data-akt="spieler-weniger" ${S.spielerAnzahl<=1?"disabled":""}>− Spieler</button>
+        <button class="btn" data-akt="spieler-mehr" ${S.spielerAnzahl>=4?"disabled":""}>＋ Spieler</button>
+      </div></div>
+    <div class="gitter">
+      ${S.spieler.slice(0,S.spielerAnzahl).map((p,i)=>`
+        <div class="kachel breit" style="--f:#7b8288;cursor:default;flex-direction:column;align-items:stretch;gap:9px">
+          <input data-spname="${i}" value="${esc(p.name)}" style="font-size:14px;font-weight:700">
+          <div class="zwei">
+            ${spielerZeile(i,"lp","LP")}
+            ${spielerZeile(i,"geld","Geld")}
+          </div>
+          ${spielerZeile(i,"marker","Marker")}
+        </div>`).join("")}
+    </div>
+  </div>`;
+}
+
+/* ---------- Gerüst ---------- */
+function render(){
+  document.getElementById("kopf").innerHTML=kopf();
+  const m=document.getElementById("main");
+  const unterwippe=`<div class="wippe klein">
+      ${[["brett","Brett"],["plaettchen","Plättchen"],["stufen","Stufen"],["kampagnen","Kampagnen"]].map(([b,n])=>
+        `<button data-bau="${b}" class="${BAU===b?"an":""}">${n}</button>`).join("")}</div>`;
+
+  if(MODUS==="spielen"){
+    m.innerHTML=`<div class="split">
+        <div class="buehne">${karteLauf()}
+          <div class="hinweis-karte">Ziehen zum Schieben · zwei Finger zoomen</div>
+          ${ueberlagerung()}</div>
+        <aside class="paneel ${SCHUBLADE?"":"zu"}">
+          <button class="griff" data-akt="schublade"></button>
+          <div class="paneel-in">${paneelSpielen()}</div>
+        </aside></div>`;
+  }else if(MODUS==="spieler"){
+    m.innerHTML=seiteSpieler();
+  }else if(BAU==="brett"){
+    m.innerHTML=`${unterwippe}<div class="split">
+        <div class="buehne">${karteEditor()}
+          <div class="hinweis-karte">Zelle antippen · ziehen zum Schieben</div></div>
+        <aside class="paneel ${SCHUBLADE?"":"zu"}">
+          <button class="griff" data-akt="schublade"></button>
+          <div class="paneel-in">${paneelBrett()}</div>
+        </aside></div>`;
+  }else{
+    m.innerHTML=unterwippe+(BAU==="plaettchen"?seitePlaettchen():BAU==="stufen"?seiteStufen():seiteKampagnen());
+  }
+  verdrahten();
+}
+
+function verdrahten(){
+  const d=document;
+  d.querySelectorAll("[data-modus]").forEach(b=>b.onclick=()=>{
+    MODUS=b.dataset.modus;RUECKLAUF=false;
+    if(MODUS==="spielen")zentrieren(); else if(MODUS==="bauen"&&BAU==="brett")zentrierenBrett();
+    render();});
+  d.querySelectorAll("[data-bau]").forEach(b=>b.onclick=()=>{
+    BAU=b.dataset.bau; if(BAU==="brett")zentrierenBrett(); render();});
+  const m=d.getElementById("main");
+  m.querySelectorAll("[data-waehl]").forEach(b=>b.onclick=()=>waehlen(b.dataset.waehl));
+  m.querySelectorAll("[data-rueck]").forEach(b=>b.onclick=()=>zurueckLaufen(b.dataset.rueck));
+  m.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>dialogPlaettchen(b.dataset.edit));
+  m.querySelectorAll("[data-stufe-edit]").forEach(b=>b.onclick=()=>dialogStufe(b.dataset.stufeEdit));
+  m.querySelectorAll("[data-stufe-start]").forEach(b=>b.onclick=()=>{
+    S.lauf=neuerLauf(b.dataset.stufeStart);MODUS="spielen";zentrieren();speichern();render();});
+  m.querySelectorAll("[data-kamp-edit]").forEach(b=>b.onclick=()=>dialogKampagne(b.dataset.kampEdit));
+  m.querySelectorAll("[data-kamp-start]").forEach(b=>b.onclick=()=>{
+    const [kid,lvl]=b.dataset.kampStart.split(":");
+    S.lauf=neuerKampagnenLauf(kid,+lvl);MODUS="spielen";zentrieren();speichern();render();});
+  m.querySelectorAll("[data-pinsel]").forEach(b=>b.onclick=()=>{EDIT.pinsel=b.dataset.pinsel;render();});
+  m.querySelectorAll("[data-spname]").forEach(inp=>inp.oninput=()=>{
+    S.spieler[+inp.dataset.spname].name=inp.value;speichern();});
+  m.querySelectorAll("[data-spfeld]").forEach(inp=>inp.onchange=()=>{
+    const [i,feld]=inp.dataset.spfeld.split(":");
+    S.spieler[+i][feld]=Math.max(0,+inp.value||0);speichern();render();});
+  m.querySelectorAll("[data-spwert]").forEach(b=>b.onclick=()=>{
+    const [i,feld,delta]=b.dataset.spwert.split(":");
+    S.spieler[+i][feld]=Math.max(0,S.spieler[+i][feld]+ +delta);speichern();render();});
+  d.querySelectorAll("[data-akt]").forEach(b=>b.onclick=()=>aktion(b.dataset.akt));
+  const bw=m.querySelector("#brettwahl");
+  if(bw) bw.onchange=()=>{EDIT.brettId=bw.value;zentrierenBrett();render();};
+  const fw=m.querySelector("#festwahl");
+  if(fw) fw.onchange=()=>{EDIT.festId=fw.value;};
+  const bulk=m.querySelector("#bulkimg");
+  if(bulk) bulk.onchange=e=>{if(e.target.files.length)sammelImport([...e.target.files]);};
+  const bgimg=m.querySelector("#bg-img");
+  if(bgimg) bgimg.onchange=async e=>{const f=e.target.files[0]; if(!f) return;
+    await grafikSetzen("bg_"+EDIT.brettId,f); render();};
+  const bgdel=m.querySelector("#bg-del");
+  if(bgdel) bgdel.onclick=async()=>{const key="bg_"+EDIT.brettId;
+    await imgDel(key); if(URLS[key]){URL.revokeObjectURL(URLS[key]);delete URLS[key];} render();};
+  const gf=m.querySelector("#gridfarbe");
+  if(gf) gf.oninput=()=>{brettById(EDIT.brettId).gridfarbe=gf.value;speichern();render();};
+  const svg=m.querySelector("#svg");
+  if(svg) gesten(svg);
+}
+
+function aktion(a){
+  const F=()=>brettById(EDIT.brettId);
+  if(a==="schublade"){SCHUBLADE=!SCHUBLADE;render();}
+  else if(a==="rueck"){RUECKLAUF=true;render();}
+  else if(a==="rueck-ab"){RUECKLAUF=false;render();}
+  else if(a==="undo") bestaetigen("Undo wirklich ausführen?",undo);
+  else if(a==="neu") bestaetigen("Neuen Lauf wirklich starten? Der aktuelle Fortschritt geht verloren.",()=>{
+    VORHER=[];S.lauf=neuerLaufAus(S.lauf.quelle);zentrieren();speichern();render();});
+  else if(a==="neu-plaettchen") dialogPlaettchen(null);
+  else if(a==="neu-stufe") dialogStufe(null);
+  else if(a==="neu-kampagne") dialogKampagne(null);
+  else if(a==="brett-neu") dialogBrett(null);
+  else if(a==="brett-einst") dialogBrett(EDIT.brettId);
+  else if(a==="startkarte") dialogStartkarte();
+  else if(a==="daten") dialogDaten();
+  else if(a==="spieler-mehr"){S.spielerAnzahl=Math.min(4,S.spielerAnzahl+1);speichern();render();}
+  else if(a==="spieler-weniger"){S.spielerAnzahl=Math.max(1,S.spielerAnzahl-1);speichern();render();}
+  else if(a==="form-raster"||a==="form-sanduhr"){
+    const b=F(),alt=Object.entries(b.zellen);
+    const neu=(a==="form-raster"?rasterZellen:sanduhrZellen)(b.breite,b.hoehe);
+    for(const [k,z] of alt) if(neu[k]&&z.rolle!=="frei") neu[k]=z;
+    if(!Object.values(neu).some(z=>z.rolle==="start")) neu[untersteZelle(neu)]={rolle:"start",plaettchen:"S01"};
+    b.zellen=neu;zentrierenBrett();speichern();render();}
+  else if(a==="form-leer"){if(!confirm("Alle Felder dieses Bretts entfernen?"))return;
+    F().zellen={};speichern();render();}
+  else if(a==="export") exportieren();
+  else if(a==="reset-plaettchen"){
+    if(!confirm("Alle Plättchen auf den Stand v1.2 zurücksetzen?"))return;
+    S.plaettchen=saatPlaettchen();S.lauf=neuerLaufAus(S.lauf.quelle);dlg().close();speichern();render();}
+  else if(a==="reset-alles"){
+    if(!confirm("Alles löschen, Grafiken eingeschlossen? Das lässt sich nicht rückgängig machen."))return;
+    (async()=>{for(const k of await imgKeys()) await imgDel(k);
+      Object.values(URLS).forEach(u=>URL.revokeObjectURL(u));URLS={};
+      const p=saatPlaettchen(),f=saatBretter();
+      S={plaettchen:p,bretter:f,stufen:saatStufen(p,f),lauf:null,spieler:standardSpieler(),spielerAnzahl:2,
+        kampagnen:[],arten:standardArten()};
+      S.lauf=neuerLauf(S.stufen[0].id);EDIT.brettId=f[0].id;
+      dlg().close();await speichern();zentrieren();render();})();}
+}
+
+/* ---- Gesten ---- */
+const zeiger=new Map();let pinch=null,bewegt=0,tippStart=false;
+function gesten(svg){
+  svg.onpointerdown=e=>{
+    zeiger.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    svg.setPointerCapture(e.pointerId);
+    if(zeiger.size===1){tippStart=true;bewegt=0;}
+    if(zeiger.size===2){const [a,b]=[...zeiger.values()];
+      pinch={d:Math.hypot(a.x-b.x,a.y-b.y),k:ANSICHT.k};tippStart=false;}};
+  svg.onpointermove=e=>{
+    if(!zeiger.has(e.pointerId))return;
+    const alt=zeiger.get(e.pointerId);
+    zeiger.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(zeiger.size===2&&pinch){
+      const [a,b]=[...zeiger.values()],d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d>4){ANSICHT.k=Math.min(6,Math.max(.3,pinch.d/d*pinch.k));nurKarte();}
+      return;}
+    if(zeiger.size===1){
+      const rect=svg.getBoundingClientRect(),f=380*ANSICHT.k/rect.width;
+      bewegt+=Math.abs(e.clientX-alt.x)+Math.abs(e.clientY-alt.y);
+      ANSICHT.x-=(e.clientX-alt.x)*f;ANSICHT.y-=(e.clientY-alt.y)*f;nurKarte();}};
+  const auf=e=>{
+    const war=zeiger.size;
+    zeiger.delete(e.pointerId); if(zeiger.size<2)pinch=null;
+    if(war===1&&tippStart&&bewegt<9){
+      const el=document.elementFromPoint(e.clientX,e.clientY);
+      const g=el&&el.closest?el.closest("[data-exit],[data-k],[data-feld]"):null;
+      if(g&&g.dataset.exit!=null&&MODUS==="spielen") ziehen(+g.dataset.exit);
+      else if(g&&g.dataset.k!=null&&MODUS==="bauen"&&BAU==="brett") zelleTippen(g.dataset.k);
+      else if(g&&g.dataset.feld!=null&&MODUS==="spielen"){
+        if(RUECKLAUF){ if(rueckZiele().some(z=>z.k===g.dataset.feld)) zurueckLaufen(g.dataset.feld); }
+        else if(!S.lauf.angebot) dialogFeldInfo(g.dataset.feld);
+      }
+    }
+    tippStart=false;};
+  svg.onpointerup=auf;svg.onpointercancel=auf;
+  svg.onwheel=e=>{e.preventDefault();
+    ANSICHT.k=Math.min(6,Math.max(.3,ANSICHT.k*(e.deltaY>0?1.12:.89)));nurKarte();};
+}
+function nurKarte(){const svg=document.getElementById("svg");if(svg)svg.setAttribute("viewBox",viewBox());}
+function zentrieren(){const [q,r]=S.lauf.pos,[x,y]=pix(q,r);ANSICHT.x=x;ANSICHT.y=y;ANSICHT.k=Math.max(ANSICHT.k,1);}
+function zentrierenBrett(){
+  const F=brettById(EDIT.brettId);if(!F)return;
+  const ks=Object.keys(F.zellen);
+  if(!ks.length){ANSICHT.x=0;ANSICHT.y=0;ANSICHT.k=1;return;}
+  let sx=0,sy=0;for(const k of ks){const [q,r]=zuQR(k),[x,y]=pix(q,r);sx+=x;sy+=y;}
+  ANSICHT.x=sx/ks.length;ANSICHT.y=sy/ks.length;
+  const spalten=new Set(ks.map(k=>zuQR(k)[0])).size;
+  ANSICHT.k=Math.max(1,spalten*1.5*RH/320);
+}
+
+(async function start(){
+  if(!("indexedDB" in window)){
+    document.getElementById("main").innerHTML=
+      `<div class="seite"><p class="warn">Dieser Browser bietet keine IndexedDB. Ohne sie kann nichts gespeichert werden.</p></div>`;
+    return;}
+  await laden();zentrieren();render();
+  if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+})();
+</script>
+</body>
+</html>
