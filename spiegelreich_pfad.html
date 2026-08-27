@@ -100,6 +100,17 @@
     color:var(--text);font:inherit;padding:10px 11px;border-radius:2px}
   .zug:hover{background:#1a1f22}
   .zug-kopf{display:flex;align-items:center;gap:7px;font-size:14.5px}
+  .belkarte{display:flex;flex-direction:column;gap:6px;text-align:left;cursor:pointer;
+    border:1px solid var(--linie2);border-top:3px solid var(--f);background:#15191c;
+    color:var(--text);font:inherit;padding:0 11px 11px;border-radius:2px;overflow:hidden;max-height:34vh}
+  .belkarte:hover{background:#1a1f22}
+  .belkarte-kopf{margin:0 -11px 4px;padding:8px 11px;background-color:#1c2226;
+    background-size:cover;background-position:center;display:flex;
+    justify-content:space-between;align-items:center;min-height:32px}
+  .belkarte-deck{font-family:ui-monospace,monospace;font-size:9.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:#dcd6c9;text-shadow:0 1px 3px #000}
+  .belkarte-stern{color:#c9a227;text-shadow:0 1px 3px #000;font-size:15px}
+  .belkarte-titel{font-size:14.5px;font-weight:700}
   .liste{display:grid;gap:6px;max-height:34vh;overflow-y:auto}
   .zeile{display:flex;align-items:center;gap:8px;text-align:left;cursor:pointer;
     border:1px solid var(--linie2);background:#15191c;color:var(--text);font:inherit;
@@ -298,6 +309,139 @@ function saatStufen(p,f){
 }
 
 /* ============================================================
+   Saat · Belohnungs-Subdecks (Themendecks + Relikte)
+   ============================================================ */
+function saatBelohnungsdecks(){
+  const K=(id,name,ki,typ,werte,anzahl,wirkung,unikat)=>({id,name,ki,typ,werte,anzahl:unikat?1:anzahl,wirkung,unikat:!!unikat});
+  return [
+    {id:"GI",name:"Gift",farbe:"#6B2D8C",modus:"proSpieler",karten:[
+      K("GI01","Giftpfeil","1","Sofortwirkung","—",3,"1 Schaden; lege 1 Gift."),
+      K("GI02","Schierlingssud","2","Sofortwirkung","—",3,"2 Gift auf ein Monster, oder 1 Gift auf jedes."),
+      K("GI03","Zehrbiss","2","Sofortwirkung","—",3,"3 Schaden; ist das Ziel vergiftet: +2."),
+      K("GI04","Giftranke","2","Wesen","1/3",3,"Tappen: lege 1 Gift."),
+      K("GI05","Nachtschatten","1","Sofortwirkung","—",3,"1 Gift; ziehe 1."),
+      K("GI06","Verseuchte Wolke","3","Sofortwirkung","—",1,"2 Gift auf jedes Monster.",true),
+      K("GI07","Tödliche Dosis","3","Sofortwirkung","—",1,"2 Schaden je Gift auf dem Ziel; entferne danach alles Gift davon.",true),
+      K("GI08","Kessel des Yamabushi","2","Ausrüstung","—",1,"Tappen: 1 Gift.",true),
+      K("GI09","Fäulnisstoß","2","Sofortwirkung","—",1,"Verdopple das Gift auf einem Monster (höchstens +4).",true),
+      K("GI10","Seuchenherd","3","Wesen","1/5",1,"Zu Beginn jeder Monsterphase: 1 Gift auf ein Monster deiner Wahl.",true),
+      K("GI11","Verwesung","4","Sofortwirkung","—",1,"Bis Kampfende tickt Gift zweimal je Monsterphase.",true),
+    ]},
+    {id:"EI",name:"Eisen",farbe:"#3E6B7A",modus:"proSpieler",karten:[
+      K("EI01","Eisenhaut","1","Sofortwirkung","—",3,"Erhalte 3 R-Marker; ein Mitspieler erhält 1."),
+      K("EI02","Schildstoß","2","Sofortwirkung","—",3,"2 Schaden; erhalte 2 R-Marker."),
+      K("EI03","Stachelpanzer","2","Sofortwirkung","—",3,"Erhalte 3 R-Marker; das nächste Monster, das dir Schaden zufügt, erleidet 2."),
+      K("EI04","Wall","3","Sofortwirkung","—",3,"Jeder Spieler erhält 2 R-Marker."),
+      K("EI05","Komainu","2","Wesen","1/4",3,"—"),
+      K("EI06","Unbeugsam","3","Sofortwirkung","—",1,"Erhalte 4 R-Marker; sie verfallen erst am Ende der nächsten Runde.",true),
+      K("EI07","Tetsu-Ring","2","Ausrüstung","—",1,"Tappen: Erhalte 2 R-Marker.",true),
+      K("EI08","Eisenwächter","4","Wesen","2/6",1,"—",true),
+      K("EI09","Schildwall der Ahnen","3","Sofortwirkung","—",1,"Jeder Spieler erhält 4 R-Marker.",true),
+      K("EI10","Gegenschlag","2","Ausrüstung","—",1,"Verbrauchst du R-Marker, erleidet der Angreifer 1 Schaden (max 1× je Angriff).",true),
+      K("EI11","Schmelzofen-Harnisch","4","Ausrüstung","—",1,"Zu Beginn jeder Spielerphase: Erhalte 3 R-Marker.",true),
+    ]},
+    {id:"WE",name:"Werkzeug",farbe:"#2C7A72",modus:"proSpieler",karten:[
+      K("WE01","Stolperdraht","1","Falle","—",3,"Greift dieses Monster an: 3 Schaden darauf."),
+      K("WE02","Rauchbombe","1","Sofortwirkung","—",3,"Verhindere bis zu 3 Schaden an einem Spieler."),
+      K("WE03","Splitterbombe","2","Sofortwirkung","—",3,"3 Schaden auf ein Monster, 1 auf jedes andere."),
+      K("WE04","Werkzeugkiste","2","Ausrüstung","—",3,"Tappen: Ziehe 1."),
+      K("WE05","Sprengsatz","3","Sofortwirkung","—",3,"6 Schaden."),
+      K("WE06","Höllenfeuerbombe","4","Sofortwirkung","—",1,"8 Schaden, frei verteilbar.",true),
+      K("WE07","Bärenfalle","2","Falle","—",1,"Greift dieses Monster an: 5 Schaden darauf, und es greift diese Runde nicht an.",true),
+      K("WE08","Donnerbüchse","3","Ausrüstung","—",1,"Tappen: 3 Schaden.",true),
+      K("WE09","Ölfass","2","Falle","—",1,"Greift dieses Monster an: 3 Schaden darauf, 2 auf jedes andere.",true),
+      K("WE10","Werkzeuggürtel","3","Ausrüstung","—",1,"Tappen: Lege eine Falle aus deiner Hand kostenlos aus.",true),
+      K("WE11","Feuerwerkskörper","2","Sofortwirkung","—",1,"2 Schaden auf jedes Monster.",true),
+    ]},
+    {id:"FL",name:"Fluss",farbe:"#1F6FB2",modus:"proSpieler",karten:[
+      K("FL01","Strömung","1","Sofortwirkung","—",3,"Wirf 1 Handkarte ab: ziehe 2."),
+      K("FL02","Klarer Grund","1","Sofortwirkung","—",3,"Zahle 2 LP: ziehe 2."),
+      K("FL03","Wellenschlag","2","Sofortwirkung","—",3,"2 Schaden; hast du diese Runde bereits 2 Karten gespielt: ziehe 1."),
+      K("FL04","Schöpfeimer","2","Ausrüstung","—",3,"Tappen: Wirf 1 Handkarte ab, ziehe 1. Danach 1 Schaden."),
+      K("FL05","Reißende Strömung","3","Sofortwirkung","—",1,"Ziehe, bis du 5 Karten auf der Hand hast.",true),
+      K("FL06","Stiller Teich","2","Ausrüstung","—",1,"Zu Beginn deiner Spielerphase: Wirf 1 Handkarte ab, ziehe 1.",true),
+      K("FL07","Blutwasser","2","Sofortwirkung","—",1,"Zahle 3 LP: ziehe 3.",true),
+      K("FL08","Wasserlauf","4","Sofortwirkung","—",1,"Ziehe 2; dein Ziehwert steigt für diesen Kampf um 1.",true),
+      K("FL09","Spiegelfläche","3","Wesen","1/4",1,"Tappen: Wirf 1 Handkarte ab, ziehe 2.",true),
+      K("FL10","Ertrinken","3","Sofortwirkung","—",1,"1 Schaden je Karte auf deiner Hand; wirf danach deine Hand ab.",true),
+    ]},
+    {id:"HA",name:"Hain",farbe:"#7D8C1E",modus:"proSpieler",karten:[
+      K("HA01","Kodama","1","Wesen","1/2",3,"Fällt es: Heile 1 LP bei einem Spieler."),
+      K("HA02","Astwächter","2","Wesen","1/5",3,"—"),
+      K("HA03","Hainruf","1","Sofortwirkung","—",3,"Ein Wesen erhält +1/+1 bleibend."),
+      K("HA04","Rindenhaut","2","Sofortwirkung","—",3,"Ein Wesen erhält +0/+3 bleibend; du erhältst 2 R-Marker."),
+      K("HA05","Waldherr","4","Wesen","3/6",1,"—",true),
+      K("HA06","Ahnenbaum","3","Ausrüstung","—",1,"Zu Beginn deiner Spielerphase: Ein Wesen erhält +1/+1 bleibend.",true),
+      K("HA07","Schutzkreis","2","Sofortwirkung","—",1,"Deine Wesen erhalten +0/+2 bleibend.",true),
+      K("HA08","Hüter des Hains","3","Wesen","2/5",1,"Blockt es für einen Mitspieler: es erleidet 2 Schaden weniger.",true),
+      K("HA09","Immergrün","3","Sofortwirkung","—",1,"Ein Wesen erhält +2/+4 bleibend.",true),
+      K("HA10","Steinerner Wächter","5","Wesen","4/8",1,"—",true),
+    ]},
+    {id:"OF",name:"Ofuda",farbe:"#A63566",modus:"proSpieler",karten:[
+      K("OF01","Bannspruch","1","Sofortwirkung","—",3,"Ein Monster verursacht diese Runde 2 Schaden weniger."),
+      K("OF02","Siegelband","2","Sofortwirkung","—",3,"Ein Monster greift diese Runde nicht an."),
+      K("OF03","Reinigung","1","Sofortwirkung","—",3,"Entferne alle Gift- und Brandmale von einem Spieler; er heilt 1 LP."),
+      K("OF04","Wächtertalisman","2","Ausrüstung","—",3,"Tappen: Ein Monster verursacht diese Runde 1 Schaden weniger."),
+      K("OF05","Großes Siegel","4","Sofortwirkung","—",1,"Jedes Monster greift diese Runde nicht an.",true),
+      K("OF06","Namensbann","3","Sofortwirkung","—",1,"Ein Monster verliert seine Fähigkeit bis Kampfende.",true),
+      K("OF07","Spiegelsiegel","3","Falle","—",1,"Greift dieses Monster an: sein Schaden trifft stattdessen es selbst.",true),
+      K("OF08","Ofuda-Kette","3","Ausrüstung","—",1,"Tappen: Ein Monster verursacht diese Runde 2 Schaden weniger.",true),
+      K("OF09","Zwang","3","Sofortwirkung","—",1,"Ein Monster greift diese Runde ein anderes Monster an, mit vollem Wert.",true),
+      K("OF10","Verbannung","5","Sofortwirkung","—",1,"Entferne ein Monster mit höchstens 10 LP aus dem Spiel; es gilt als besiegt.",true),
+    ]},
+    {id:"IB",name:"Ibara",farbe:"#B4541E",modus:"proSpieler",karten:[
+      K("IB01","Dornenmantel","1","Sofortwirkung","—",3,"Diese Runde: Fügt dir ein Monster Schaden zu, erleidet es 2."),
+      K("IB02","Rankengriff","2","Sofortwirkung","—",3,"3 Schaden; stehst du unter der Hälfte deiner Start-LP: +3."),
+      K("IB03","Dornenwall","2","Sofortwirkung","—",3,"Erhalte 3 R-Marker. Verbrauchst du diese Runde R-Marker, erleidet das Monster 2."),
+      K("IB04","Blutdorn","2","Wesen","1/3",3,"Blockt es, erleidet der Angreifer 2."),
+      K("IB05","Eisendorn-Reif","2","Ausrüstung","—",1,"Fügt dir ein Monster Schaden zu, erleidet es 1.",true),
+      K("IB06","Dornenkrone","4","Ausrüstung","—",1,"Zu Beginn jeder Monsterphase: Diese Runde erleidet jedes Monster, das dir Schaden zufügt, 3.",true),
+      K("IB07","Dornenfeld","3","Sofortwirkung","—",1,"Diese Runde: Fügt ein Monster einem beliebigen Spieler Schaden zu, erleidet es 2.",true),
+      K("IB08","Ibara-Geist","3","Wesen","2/4",1,"Blockt es, erleidet der Angreifer 3.",true),
+      K("IB09","Rache der Ranken","3","Sofortwirkung","—",1,"2 Schaden auf jedes Monster; erhalte 3 R-Marker.",true),
+      K("IB10","Narbengewebe","1","Sofortwirkung","—",1,"Erhalte 1 R-Marker je 2 LP, die dir auf dein Maximum fehlen (max 6).",true),
+    ]},
+    {id:"SI",name:"Shirushi",farbe:"#C0392B",modus:"proSpieler",karten:[
+      K("SI01","Zeichenwurf","1","Sofortwirkung","—",3,"1 Schaden; lege 1 Zeichen."),
+      K("SI02","Siegelschnitt","2","Sofortwirkung","—",3,"2 Schaden; lege 2 Zeichen."),
+      K("SI03","Brechschlag","2","Sofortwirkung","—",3,"3 Schaden; verbrauche bis zu 2 Zeichen vom Ziel für je +2 Schaden."),
+      K("SI04","Zeichendeuter","2","Wesen","1/3",3,"Tappen: lege 1 Zeichen auf ein Monster in einer beliebigen Bahn."),
+      K("SI05","Siegelrolle","2","Ausrüstung","—",1,"Tappen: lege 1 Zeichen.",true),
+      K("SI06","Blutsiegel","3","Sofortwirkung","—",1,"Verbrauche alle Zeichen auf einem Monster: 3 Schaden je Zeichen.",true),
+      K("SI07","Wandelndes Mal","3","Sofortwirkung","—",1,"Verschiebe alle Zeichen von einem Monster auf ein anderes; lege 2 hinzu.",true),
+      K("SI08","Vollstreckung","4","Sofortwirkung","—",1,"6 Schaden auf ein gezeichnetes Monster; entferne danach alle Zeichen davon.",true),
+      K("SI09","Zeichenregen","3","Sofortwirkung","—",1,"Lege 1 Zeichen auf jedes Monster.",true),
+      K("SI10","Mal der Ahnen","3","Ausrüstung","—",1,"Fügst du einem gezeichneten Monster Schaden zu, erhältst du 1 R-Marker.",true),
+    ]},
+    {id:"RL",name:"Relikte",farbe:"#2B2F38",modus:"gemeinsam",karten:[
+      K("RL01","Schleifstein","—","Relikt · Mächtig","—",1,"Dein Ziehwert steigt um 1",true),
+      K("RL02","Ki-Ader","—","Relikt · Mächtig","—",1,"Du darfst pro Runde eine zweite Handkarte als Ki-Quelle auslegen",true),
+      K("RL03","Aschekrone","—","Relikt · Mächtig","—",1,"Fällt ein Monster, zieht der Spieler, der den letzten Schaden zugefügt hat, 1 Karte",true),
+      K("RL04","Der zweite Atem","—","Relikt · Mächtig","—",1,"Einmal je Kampf darf ein Spieler seine ganze Hand abwerfen und bis zum Handmaximum neu ziehen",true),
+      K("RL05","Ahnenharnisch","—","Relikt · Mächtig","—",1,"Der erste Schaden, den ein Spieler je Kampf erleidet, wird auf 0 gesenkt",true),
+      K("RL06","Rostschicht","—","Relikt · Mächtig","—",1,"Erhältst du R-Marker, erhalte 1 zusätzlichen",true),
+      K("RL07","Krämerbeutel","—","Relikt · Nische","—",1,"Shoppreise gelten eine Deckstufe niedriger. Nicht auf Relikte",true),
+      K("RL08","Eisenwurzel","—","Relikt · Nische","—",1,"Start-LP dauerhaft +3. Heilt sofort 3 LP",true),
+      K("RL09","Zweiter Blick","—","Relikt · Nische","—",1,"Einmal je Belohnung darf jeder seine drei aufgedeckten Karten zurückmischen und neu aufdecken. Nur Belohnungen, nicht der Weg",true),
+      K("RL10","Salzschnur","—","Relikt · Nische","—",1,"Gift auf Spielern tickt nur noch jede zweite Monsterphase",true),
+      K("RL11","Wetterstein","—","Relikt · Nische","—",1,"Bei jeder Rast heilt ihr zusätzlich 2 LP",true),
+      K("RL12","Wendestein","—","Relikt · Nische","—",1,"Einmal je Kampf dürft ihr einen aufgedeckten Encounter-Modifikator abwerfen und einen neuen ziehen",true),
+      K("RL13","Totenlicht","—","Relikt · Nische","—",1,"Fällt ein Spieler auf 0 LP, bleibt er mit 1 LP stehen. Einmal je Run",true),
+      K("RL14","Prüfstein","—","Relikt · Nische","—",1,"In Kämpfen der Stufe Schwer erhält jeder Spieler zu Kampfbeginn 2 R-Marker",true),
+      K("RL15","Zunderbüchse","—","Relikt · Nische","—",1,"Brandmale, die ihr legt, halten eine Runde länger",true),
+      K("RL16","Gebetsstein","—","Relikt · Combo","—",1,"Deine R-Marker verfallen nicht am Rundenende",true),
+      K("RL17","Spiegelscherbe","—","Relikt · Combo","—",1,"Einmal je Runde: Hast du bereits zwei Karten gespielt, nimm eine Karte aus deinem Ablagestapel auf die Hand",true),
+      K("RL18","Wurzelgeflecht","—","Relikt · Combo","—",1,"Deine Wesen kommen mit +0/+1 ins Spiel",true),
+      K("RL19","Schmiedemal","—","Relikt · Combo","—",1,"Eine bereits aufgewertete Karte darf zusätzlich die jeweils andere Aufwertung erhalten. Höchstens eine Karte je Spieler",true),
+      K("RL20","Kettenglied","—","Relikt · Combo","—",1,"Spielst du in einer Runde deine dritte Karte, erhältst du 2 R-Marker",true),
+      K("RL21","Opferschale","—","Relikt · Combo","—",1,"Einmal je Runde: Wirf eine Handkarte ab, erhalte 1 Ki",true),
+      K("RL22","Vorzeichen","—","Relikt · Combo","—",1,"Die erste Karte, die jeder Spieler im Kampf spielt, kostet 1 Ki weniger",true),
+      K("RL23","Erbstück","—","Relikt · Combo","—",1,"Einmal je Kampf darf jeder Spieler eine getappte Ausrüstung enttappen",true),
+    ]},
+  ];
+}
+
+/* ============================================================
    Speicher
    ============================================================ */
 const DB_NAME="spiegelreich",DB_VER=1;let _db=null;
@@ -370,12 +514,13 @@ function neuerKampagnenLauf(kampagneId,levelIndex){
   return neuerLaufAus({typ:"kampagne",kid:kampagneId,lvl:levelIndex});
 }
 
-const standardSpieler=()=>[1,2,3,4].map(n=>({name:"Spieler "+n,lp:10,geld:0,marker:0}));
+const standardSpieler=()=>[1,2,3,4].map(n=>({name:"Spieler "+n,lp:10,geld:0,marker:0,karten:[]}));
 async function speichern(){
   if(spLaeuft){spNochmal=true;return;}
   spLaeuft=true;
   try{await kvSet("stand",{plaettchen:S.plaettchen,bretter:S.bretter,stufen:S.stufen,lauf:S.lauf,
-    spieler:S.spieler,spielerAnzahl:S.spielerAnzahl,kampagnen:S.kampagnen,arten:S.arten});}
+    spieler:S.spieler,spielerAnzahl:S.spielerAnzahl,kampagnen:S.kampagnen,arten:S.arten,
+    belohnungsdecks:S.belohnungsdecks});}
   catch(e){meldung("Speichern fehlgeschlagen: "+e.message);}
   spLaeuft=false; if(spNochmal){spNochmal=false;speichern();}
 }
@@ -389,12 +534,14 @@ async function laden(){
        spieler:(d.spieler&&d.spieler.length===4)?d.spieler:standardSpieler(),
        spielerAnzahl:d.spielerAnzahl||2,
        kampagnen:d.kampagnen||[],
-       arten:(d.arten&&d.arten.length)?d.arten:standardArten()};
+       arten:(d.arten&&d.arten.length)?d.arten:standardArten(),
+       belohnungsdecks:(d.belohnungsdecks&&d.belohnungsdecks.length)?d.belohnungsdecks:saatBelohnungsdecks()};
   }else{
     const p=saatPlaettchen(),f=saatBretter();
     S={plaettchen:p,bretter:f,stufen:saatStufen(p,f),lauf:null,spieler:standardSpieler(),spielerAnzahl:2,
-       kampagnen:[],arten:standardArten()};
+       kampagnen:[],arten:standardArten(),belohnungsdecks:saatBelohnungsdecks()};
   }
+  S.spieler.forEach(sp=>{if(!sp.karten) sp.karten=[];});
   S.stufen.forEach(st=>{if(!brettById(st.brettId)) st.brettId=S.bretter[0].id;});
   if(!S.lauf||!S.lauf.brett) S.lauf=neuerLauf(S.stufen[0].id);
   EDIT.brettId=S.bretter[0].id;
@@ -413,7 +560,7 @@ function kantenLage(kante){
   return {zk,lage:"frei"};
 }
 function ziehen(kante){
-  const L=S.lauf; if(L.angebot||L.ende) return;
+  const L=S.lauf; if(L.angebot||L.ende||L.bestehenAusstehend) return;
   merken();
   const {zk,lage}=kantenLage(kante);
   if(lage==="aus") return;
@@ -443,7 +590,103 @@ function waehlen(gewaehlt){
   if(t.art==="kampf"||t.art==="boss") L.scharmuetzel++;
   L.angebot=null;
   L.log.unshift(t.name+" betreten."+hinweis);
-  pruefeEnde(); nach();
+  pruefeEnde();
+  if(t.belohnung) L.bestehenAusstehend=t.belohnung;
+  nach();
+}
+
+/* ============================================================
+   Belohnungen · Themendecks + Relikte
+   ============================================================ */
+function belohnungsPool(deckId){
+  const L=S.lauf;
+  if(!L.belohnungsPools) L.belohnungsPools={};
+  if(!L.belohnungsPools[deckId]){
+    const deck=S.belohnungsdecks.find(d=>d.id===deckId);
+    const pool=[];
+    if(deck) for(const k of deck.karten) for(let i=0;i<(k.anzahl||1);i++) pool.push(k.id);
+    L.belohnungsPools[deckId]=shuffle(pool);
+  }
+  return L.belohnungsPools[deckId];
+}
+function belohnungskarteById(id){
+  for(const d of S.belohnungsdecks){ const k=d.karten.find(c=>c.id===id); if(k) return {karte:k,deck:d}; }
+  return null;
+}
+function bestehenBestaetigt(){
+  merken();
+  const L=S.lauf; if(!L.bestehenAusstehend) return;
+  const cfg=L.bestehenAusstehend; L.bestehenAusstehend=null;
+  starteBelohnung(cfg);
+  speichern(); render();
+}
+function starteBelohnung(cfg){
+  const L=S.lauf;
+  if(cfg.modus==="wahlProSpieler"){
+    const deckIds=S.belohnungsdecks.filter(d=>d.modus!=="gemeinsam").map(d=>d.id);
+    if(!deckIds.length) return;
+    L.belohnung={cfgModus:"wahlProSpieler",deckIds,gemeinsam:false,spielerIndex:0,
+      phase:"deck",gewaehltesDeck:null,ids:[]};
+    return;
+  }
+  let deckIds,gemeinsam=false;
+  if(cfg.modus==="alle"){
+    deckIds=S.belohnungsdecks.filter(d=>d.modus!=="gemeinsam").map(d=>d.id);
+  }else{
+    deckIds=[cfg.deckId];
+    const deck=S.belohnungsdecks.find(d=>d.id===cfg.deckId);
+    gemeinsam=!!(deck&&deck.modus==="gemeinsam");
+  }
+  if(!deckIds.length) return;
+  L.belohnung={cfgModus:cfg.modus,deckIds,gemeinsam,spielerIndex:0,phase:"karten",gewaehltesDeck:null,ids:[]};
+  naechsteBelohnungsRunde();
+  if(!L.belohnung.ids.length) L.belohnung=null;
+}
+function naechsteBelohnungsRunde(){
+  const L=S.lauf,B=L.belohnung; if(!B) return;
+  const quellDecks=(B.cfgModus==="wahlProSpieler")?[B.gewaehltesDeck]:B.deckIds;
+  let pool=[];
+  for(const dId of quellDecks) pool=pool.concat(belohnungsPool(dId).map(id=>({id,deckId:dId})));
+  if(!pool.length){ B.ids=[]; return; }
+  const gezogen=shuffle(pool).slice(0,Math.min(3,pool.length));
+  for(const g of gezogen){
+    const p=belohnungsPool(g.deckId);
+    const idx=p.indexOf(g.id);
+    if(idx>=0) p.splice(idx,1);
+  }
+  B.ids=gezogen;
+}
+function waehleBelohnungsDeck(deckId){
+  const L=S.lauf,B=L.belohnung; if(!B||B.phase!=="deck") return;
+  B.gewaehltesDeck=deckId;
+  B.phase="karten";
+  naechsteBelohnungsRunde();
+  if(!B.ids.length){ B.phase="deck"; B.gewaehltesDeck=null; meldung("Dieses Subdeck ist gerade leer. Wähle ein anderes."); }
+  speichern(); render();
+}
+function waehleBelohnung(gewaehltId){
+  merken();
+  const L=S.lauf,B=L.belohnung; if(!B) return;
+  const rest=B.ids.filter(g=>g.id!==gewaehltId);
+  for(const r of rest) belohnungsPool(r.deckId).push(r.id);
+  for(const dId of new Set(rest.map(r=>r.deckId))) L.belohnungsPools[dId]=shuffle(L.belohnungsPools[dId]);
+  const info=belohnungskarteById(gewaehltId);
+  const name=info?info.karte.name:gewaehltId;
+  if(B.gemeinsam){
+    if(!L.beute) L.beute=[];
+    L.beute.push(gewaehltId);
+    L.log.unshift("Belohnung (gemeinsam): "+name+" erhalten.");
+    L.belohnung=null;
+  }else{
+    const sp=S.spieler[B.spielerIndex];
+    if(sp){ if(!sp.karten) sp.karten=[]; sp.karten.push(gewaehltId);
+      L.log.unshift((sp.name||("Spieler "+(B.spielerIndex+1)))+" erhält: "+name+"."); }
+    B.spielerIndex++;
+    if(B.spielerIndex>=S.spielerAnzahl) L.belohnung=null;
+    else if(B.cfgModus==="wahlProSpieler"){ B.phase="deck"; B.gewaehltesDeck=null; B.ids=[]; }
+    else{ naechsteBelohnungsRunde(); if(!B.ids.length) L.belohnung=null; }
+  }
+  speichern(); render();
 }
 function offeneAusgaenge(k,id){
   const [q,r]=zuQR(k), t=byId(id); if(!t) return [];
@@ -540,6 +783,15 @@ function dialogPlaettchen(id){
         data-kante="${k}">Kante ${k}</button>`).join("")}</div>
       <div class="hinweis" style="margin-top:5px" id="f-typ">Typ ${typVon(t.ausgaenge).t} · ${typVon(t.ausgaenge).name}</div></div>
     <div class="feld"><span class="lbl">Rückseite</span><textarea id="f-rueck">${esc(t.rueck||"")}</textarea></div>
+    <div class="feld"><span class="lbl">Belohnung beim Betreten</span>
+      <select id="f-belohnung">
+        <option value="aus" ${!t.belohnung?"selected":""}>Aus</option>
+        <option value="alle" ${t.belohnung&&t.belohnung.modus==="alle"?"selected":""}>Alle Subdecks gemischt (pro Spieler)</option>
+        <option value="wahlfrei" ${t.belohnung&&t.belohnung.modus==="wahlProSpieler"?"selected":""}>Jeder Spieler wählt sein Subdeck frei</option>
+        ${S.belohnungsdecks.map(d=>`<option value="${d.id}"
+          ${t.belohnung&&t.belohnung.modus==="subdeck"&&t.belohnung.deckId===d.id?"selected":""}>
+          Nur „${esc(d.name)}"${d.modus==="gemeinsam"?" (gemeinsam)":""}</option>`).join("")}
+      </select></div>
     <div class="feld"><span class="lbl">Grafik</span>
       <div class="reihe"><label class="btn">Bild wählen<input type="file" accept="image/*" hidden id="f-img"></label>
       ${URLS[t.id]?`<button class="btn" type="button" id="f-imgdel">Grafik entfernen</button>`:""}</div>
@@ -589,9 +841,12 @@ function dialogPlaettchen(id){
     const nid=box.querySelector("#f-id").value.trim();
     if(!nid){meldung("Ohne ID geht es nicht.");return;}
     if(neu&&byId(nid)){meldung("Die ID "+nid+" gibt es schon.");return;}
+    const belWert=box.querySelector("#f-belohnung").value;
+    const belohnung=belWert==="aus"?null:belWert==="alle"?{modus:"alle"}
+      :belWert==="wahlfrei"?{modus:"wahlProSpieler"}:{modus:"subdeck",deckId:belWert};
     const daten={id:nid,name:box.querySelector("#f-name").value.trim()||nid,
       art:box.querySelector("#f-art").value,ausgaenge:[...ausg].sort((a,b)=>a-b),
-      v:t.v||"A",rueck:box.querySelector("#f-rueck").value};
+      v:t.v||"A",rueck:box.querySelector("#f-rueck").value,belohnung};
     if(neu) S.plaettchen.push(daten); else Object.assign(byId(t.id),daten);
     dlg().close();speichern();render();};
   dlg().showModal();
@@ -694,6 +949,108 @@ function dialogStufe(id){
       sackgroesse:+box.querySelector("#s-groesse").value||0,
       zieh:+box.querySelector("#s-zieh").value||3,notiz:box.querySelector("#s-notiz").value};
     if(neu) S.stufen.push(daten); else Object.assign(stufeById(L.id),daten);
+    dlg().close();speichern();render();};
+  dlg().showModal();
+}
+
+function dialogBelohnungskarte(deckId,cardId,zurueck){
+  const deck=S.belohnungsdecks.find(d=>d.id===deckId); if(!deck) return;
+  const neu=!cardId;
+  const k=neu?{id:"",name:"",ki:"—",typ:"Sofortwirkung",werte:"—",anzahl:1,wirkung:"",unikat:false}
+    :{...deck.karten.find(c=>c.id===cardId)};
+  const box=dbox();
+  const schliessen=()=>{dlg().close(); if(zurueck) zurueck();};
+  box.innerHTML=`<div class="lbl" style="margin-bottom:10px">${neu?"Neue Karte":"Karte ändern"} · ${esc(deck.name)}</div>
+    <div class="zwei">
+      <div class="feld"><span class="lbl">ID</span><input id="bk-id" value="${esc(k.id)}" ${neu?"":"readonly"}></div>
+      <div class="feld"><span class="lbl">Name</span><input id="bk-name" value="${esc(k.name)}"></div></div>
+    <div class="zwei">
+      <div class="feld"><span class="lbl">Ki-Kosten (— = keine)</span><input id="bk-ki" value="${esc(k.ki||"—")}"></div>
+      <div class="feld"><span class="lbl">Typ</span><input id="bk-typ" value="${esc(k.typ||"")}"
+        placeholder="Sofortwirkung, Ausrüstung, Wesen, Falle …"></div></div>
+    <div class="zwei">
+      <div class="feld"><span class="lbl">Werte (— = keine)</span><input id="bk-werte" value="${esc(k.werte||"—")}" placeholder="z. B. 2/3"></div>
+      <div class="feld"><span class="lbl">Anzahl im Deck</span><input id="bk-anzahl" type="number" min="1" value="${k.anzahl||1}"></div></div>
+    <div class="feld"><span class="lbl">Wirkung</span><textarea id="bk-wirkung">${esc(k.wirkung||"")}</textarea></div>
+    <div class="feld"><label style="display:flex;gap:7px;align-items:center;font-size:13px">
+      <input type="checkbox" id="bk-unikat" style="width:auto" ${k.unikat?"checked":""}>
+      Unikat (seltene Karte · Anzahl wird auf 1 gesetzt)</label></div>
+    <div class="reihe" style="margin-top:12px">
+      <button class="btn" id="bk-ok">Sichern</button><button class="btn" id="bk-ab">Abbrechen</button>
+      ${neu?"":`<button class="btn" id="bk-del" style="margin-left:auto;border-color:var(--kampf)">Löschen</button>`}</div>`;
+  box.querySelector("#bk-unikat").onchange=e=>{if(e.target.checked) box.querySelector("#bk-anzahl").value=1;};
+  box.querySelector("#bk-ab").onclick=schliessen;
+  const dl=box.querySelector("#bk-del");
+  if(dl) dl.onclick=()=>{if(!confirm("Karte "+k.id+" löschen?"))return;
+    deck.karten=deck.karten.filter(c=>c.id!==k.id);speichern();render();schliessen();};
+  box.querySelector("#bk-ok").onclick=()=>{
+    const nid=box.querySelector("#bk-id").value.trim();
+    if(!nid){meldung("Ohne ID geht es nicht.");return;}
+    if(neu&&deck.karten.some(c=>c.id===nid)){meldung("Die ID "+nid+" gibt es in diesem Subdeck schon.");return;}
+    const unikat=box.querySelector("#bk-unikat").checked;
+    const daten={id:nid,name:box.querySelector("#bk-name").value.trim()||nid,
+      ki:box.querySelector("#bk-ki").value.trim()||"—",
+      typ:box.querySelector("#bk-typ").value.trim()||"Sofortwirkung",
+      werte:box.querySelector("#bk-werte").value.trim()||"—",
+      anzahl:unikat?1:Math.max(1,+box.querySelector("#bk-anzahl").value||1),
+      wirkung:box.querySelector("#bk-wirkung").value,unikat};
+    if(neu) deck.karten.push(daten); else Object.assign(deck.karten.find(c=>c.id===k.id),daten);
+    speichern();render();schliessen();};
+  dlg().showModal();
+}
+
+function dialogBelohnungsdeck(id){
+  const neu=!id;
+  const D=neu?{id:"D"+(S.belohnungsdecks.length+1),name:"Neues Subdeck",farbe:"#7b8288",modus:"proSpieler",karten:[]}
+    :S.belohnungsdecks.find(d=>d.id===id);
+  const box=dbox();
+  const kartenListe=()=>D.karten.length?D.karten.map(k=>`<button class="zeile" data-bk-edit="${k.id}">
+      ${k.unikat?"★ ":""}${esc(k.name)}<span class="lbl">${esc(k.id)}${k.anzahl>1?" · ×"+k.anzahl:""}</span></button>`).join("")
+    :`<div class="text">Noch keine Karten.</div>`;
+  box.innerHTML=`<div class="lbl" style="margin-bottom:10px">${neu?"Neues Subdeck":"Subdeck ändern"}</div>
+    <div class="zwei">
+      <div class="feld"><span class="lbl">Name</span><input id="d-name" value="${esc(D.name)}"></div>
+      <div class="feld"><span class="lbl">Farbe</span><input type="color" id="d-farbe" value="${D.farbe}" style="height:34px;padding:2px"></div></div>
+    <div class="feld"><span class="lbl">Modus</span>
+      <select id="d-modus">
+        <option value="proSpieler" ${D.modus!=="gemeinsam"?"selected":""}>Pro Spieler (jeder zieht eigene 3er-Auswahl)</option>
+        <option value="gemeinsam" ${D.modus==="gemeinsam"?"selected":""}>Gemeinsam (eine Auswahl für die ganze Gruppe)</option>
+      </select></div>
+    <div class="feld"><span class="lbl">Bild</span>
+      <div class="reihe"><label class="btn">Bild wählen<input type="file" accept="image/*" hidden id="d-img"></label>
+      ${URLS["beldeck_"+D.id]?`<button class="btn" type="button" id="d-imgdel">Entfernen</button>`:""}</div>
+      <div id="d-vor" style="margin-top:7px">${URLS["beldeck_"+D.id]?`<img src="${URLS["beldeck_"+D.id]}" style="max-width:120px;border:1px solid var(--linie)">`:""}</div></div>
+    <div class="trenner"></div>
+    <div class="lbl" style="margin-bottom:6px">Karten · <span id="d-kartenzahl">${D.karten.length}</span>
+      <button type="button" class="btn" id="d-karte-neu" style="margin-left:8px">＋ Karte</button></div>
+    <div class="liste" id="d-kartenliste" style="max-height:220px">${kartenListe()}</div>
+    <div class="reihe" style="margin-top:12px"><button class="btn" id="d-ok">Sichern</button>
+      <button class="btn" id="d-ab">Abbrechen</button>
+      ${neu?"":`<button class="btn" id="d-del" style="margin-left:auto;border-color:var(--kampf)">Löschen</button>`}</div>`;
+  const zurueck=()=>dialogBelohnungsdeck(D.id);
+  box.querySelectorAll("[data-bk-edit]").forEach(b=>b.onclick=()=>{dlg().close();dialogBelohnungskarte(D.id,b.dataset.bkEdit,zurueck);});
+  box.querySelector("#d-karte-neu").onclick=()=>{dlg().close();dialogBelohnungskarte(D.id,null,zurueck);};
+  box.querySelector("#d-img").onchange=async e=>{
+    const file=e.target.files[0]; if(!file) return;
+    await grafikSetzen("beldeck_"+D.id,file);
+    box.querySelector("#d-vor").innerHTML=`<img src="${URLS["beldeck_"+D.id]}" style="max-width:120px;border:1px solid var(--linie)">`;};
+  const idel=box.querySelector("#d-imgdel");
+  if(idel) idel.onclick=async()=>{await imgDel("beldeck_"+D.id);
+    if(URLS["beldeck_"+D.id]){URL.revokeObjectURL(URLS["beldeck_"+D.id]);delete URLS["beldeck_"+D.id];}
+    box.querySelector("#d-vor").innerHTML="";idel.remove();};
+  box.querySelector("#d-ab").onclick=()=>dlg().close();
+  const dl=box.querySelector("#d-del");
+  if(dl) dl.onclick=()=>{
+    if(S.plaettchen.some(t=>t.belohnung&&t.belohnung.deckId===D.id)){
+      meldung("Dieses Subdeck wird von einem Plättchen benutzt. Erst dort umstellen.");return;}
+    if(!confirm("Subdeck „"+D.name+"“ löschen?"))return;
+    S.belohnungsdecks=S.belohnungsdecks.filter(x=>x.id!==D.id);
+    dlg().close();speichern();render();};
+  box.querySelector("#d-ok").onclick=()=>{
+    D.name=box.querySelector("#d-name").value.trim()||D.name;
+    D.farbe=box.querySelector("#d-farbe").value;
+    D.modus=box.querySelector("#d-modus").value;
+    if(neu) S.belohnungsdecks.push(D);
     dlg().close();speichern();render();};
   dlg().showModal();
 }
@@ -805,7 +1162,8 @@ async function exportieren(){
   try{for(const k of await imgKeys()){const b=await imgGet(k);if(b)bilder[k]=await blobZuBase64(b);}}catch(e){}
   const daten={format:"spiegelreich-pfad",version:2,zeit:new Date().toISOString(),
     plaettchen:S.plaettchen,bretter:S.bretter,stufen:S.stufen,lauf:S.lauf,
-    spieler:S.spieler,spielerAnzahl:S.spielerAnzahl,kampagnen:S.kampagnen,arten:S.arten,bilder};
+    spieler:S.spieler,spielerAnzahl:S.spielerAnzahl,kampagnen:S.kampagnen,arten:S.arten,
+    belohnungsdecks:S.belohnungsdecks,bilder};
   const b=new Blob([JSON.stringify(daten)],{type:"application/json"});
   const a=document.createElement("a");a.href=URL.createObjectURL(b);
   a.download="spiegelreich_pfad_"+new Date().toISOString().slice(0,10)+".json";
@@ -824,6 +1182,8 @@ async function importieren(file){
     S.spielerAnzahl=d.spielerAnzahl||2;
     S.kampagnen=d.kampagnen||[];
     S.arten=(d.arten&&d.arten.length)?d.arten:standardArten();
+    S.belohnungsdecks=(d.belohnungsdecks&&d.belohnungsdecks.length)?d.belohnungsdecks:saatBelohnungsdecks();
+    S.spieler.forEach(sp=>{if(!sp.karten) sp.karten=[];});
     EDIT.brettId=S.bretter[0].id;
     if(d.bilder) for(const [id,du] of Object.entries(d.bilder)){
       const b=await (await fetch(du)).blob();await imgSet(id,b);
@@ -948,8 +1308,8 @@ function ausgangsKnoepfe(x,y,t){
           stroke="#5a6165" stroke-width="1.6"/></g>`;
       continue;
     }
-    const ziehbar = lage==="frei" && L.sack.length>0 && !L.angebot && !L.ende;
-    const gehbar  = lage==="belegt" && !L.angebot;
+    const ziehbar = lage==="frei" && L.sack.length>0 && !L.angebot && !L.ende && !L.bestehenAusstehend;
+    const gehbar  = lage==="belegt" && !L.angebot && !L.bestehenAusstehend;
     const aktiv = ziehbar||gehbar;
     const fuell = ziehbar?(artFarbe(t.art)||"#888"):"#0e1113";
     const rand  = gehbar?"#7d8489":(artFarbe(t.art)||"#888");
@@ -1082,7 +1442,7 @@ function paneelSpielen(){
       : t.ausgaenge.length ? "Kein freier Ausgang. Lauf zurück."
       : "Sackgasse. Lauf zurück oder beende den Lauf."}</div>
     <div class="reihe">
-      <button class="btn" data-akt="rueck" ${zl.length&&!L.angebot?"":"disabled"}>Zurücklaufen</button>
+      <button class="btn" data-akt="rueck" ${zl.length&&!L.angebot&&!L.bestehenAusstehend?"":"disabled"}>Zurücklaufen</button>
       <button class="btn" data-akt="undo" ${VORHER.length?"":"disabled"}>Undo</button>
       <button class="btn" data-akt="neu">Neuer Lauf</button>
     </div>
@@ -1120,8 +1480,55 @@ function vorschauPlaettchen(t){
     <polygon points="${pts}" fill="${bild?"none":"#14181b"}" stroke="${farbe}" stroke-width="2"/>
     ${innen}${pfeile}</svg>`;
 }
+function vorschauBelohnungskarte(eintrag){
+  const info=belohnungskarteById(eintrag.id); if(!info) return "";
+  const {karte,deck}=info;
+  const bildUrl=URLS["beldeck_"+deck.id];
+  return `<button class="belkarte" data-bel-waehl="${karte.id}" style="--f:${deck.farbe}">
+    <div class="belkarte-kopf" style="${bildUrl?`background-image:url('${bildUrl}')`:""}">
+      <span class="belkarte-deck">${esc(deck.name)}</span>
+      ${karte.unikat?'<span class="belkarte-stern">★</span>':""}
+    </div>
+    <div class="belkarte-titel">${esc(karte.name)}</div>
+    <div class="lbl">${karte.ki&&karte.ki!=="—"?"Ki "+esc(karte.ki)+" · ":""}${esc(karte.typ)}${karte.werte&&karte.werte!=="—"?" · "+esc(karte.werte):""}</div>
+    <div class="text">${esc(karte.wirkung||"")}</div>
+  </button>`;
+}
+function vorschauBelohnungsdeck(deck){
+  const bildUrl=URLS["beldeck_"+deck.id];
+  return `<button class="belkarte" data-bel-deck-waehl="${deck.id}" style="--f:${deck.farbe}">
+    <div class="belkarte-kopf" style="${bildUrl?`background-image:url('${bildUrl}')`:""}">
+      <span class="belkarte-deck">Subdeck</span></div>
+    <div class="belkarte-titel">${esc(deck.name)}</div>
+    <div class="lbl">${deck.karten.length} Karten${deck.modus==="gemeinsam"?" · gemeinsam":""}</div>
+  </button>`;
+}
+function belohnungsUeberlagerung(){
+  const L=S.lauf,B=L.belohnung; if(!B) return "";
+  const spielerName=(S.spieler[B.spielerIndex]&&S.spieler[B.spielerIndex].name)||("Spieler "+(B.spielerIndex+1));
+  if(B.phase==="deck"){
+    const decks=B.deckIds.map(id=>S.belohnungsdecks.find(d=>d.id===id)).filter(Boolean);
+    return `<div class="ueber"><div class="ueber-kopf">
+        <span class="lbl">${esc(spielerName)} wählt ein Subdeck (${B.spielerIndex+1}/${S.spielerAnzahl})</span></div>
+      <div class="wahl">${decks.map(d=>vorschauBelohnungsdeck(d)).join("")}</div></div>`;
+  }
+  const kopf=B.gemeinsam
+    ? "Belohnung für die Gruppe · ziehe 3, wählt 1"
+    : `Belohnung für ${esc(spielerName)} (${B.spielerIndex+1}/${S.spielerAnzahl}) · ziehe 3, wähle 1`;
+  return `<div class="ueber"><div class="ueber-kopf">
+      <span class="lbl">${kopf}</span>
+      <span class="lbl" style="color:#4d5459">gewählt ist gewählt, Rest zurück in den Pool</span></div>
+    <div class="wahl">${B.ids.map(e=>vorschauBelohnungskarte(e)).join("")}</div></div>`;
+}
 function ueberlagerung(){
   const L=S.lauf;
+  if(L.belohnung) return belohnungsUeberlagerung();
+  if(L.bestehenAusstehend){
+    return `<div class="ueber"><div class="ueber-kopf">
+        <span class="lbl">Am Tisch ausgetragen?</span></div>
+      <div class="fuehrung" style="margin-top:0">Erst wenn bestanden, gibt es die Belohnung.</div>
+      <button class="btn an-toggle" style="width:100%;margin-top:9px" data-akt="bestanden">Bestanden</button></div>`;
+  }
   if(L.angebot){
     const pfeilKante=`<span style="display:inline-block;transform:rotate(${WINKEL[L.angebot.kante]}deg)">▶</span>`;
     return `<div class="ueber"><div class="ueber-kopf">
@@ -1264,6 +1671,24 @@ function seiteKampagnen(){
   </div>`;
 }
 
+function seiteBelohnungen(){
+  return `<div class="seite">
+    <div class="seite-kopf">
+      <div class="lbl">Belohnungen · ${S.belohnungsdecks.length} Subdecks</div>
+      <button class="btn" data-akt="neu-belohnungsdeck">＋ Subdeck</button></div>
+    <div class="fuehrung">Ein Subdeck ist eine farbige Kartengruppe. „Pro Spieler" zieht jeder eine eigene
+      3er-Auswahl, „Gemeinsam" (z. B. Relikte) ist eine einzige Auswahl für die Gruppe. Welches Plättchen
+      welches Subdeck auslöst, legst du beim Plättchen selbst fest.</div>
+    <div class="gitter">${S.belohnungsdecks.map(d=>{
+      const bild=URLS["beldeck_"+d.id];
+      return `<button class="kachel" data-beldeck-edit="${d.id}" style="--f:${d.farbe}">
+        ${bild?`<img src="${bild}" alt="">`:`<span class="platz" style="color:${d.farbe}">${d.karten.length}</span>`}
+        <span class="kachel-txt"><strong>${esc(d.name)}</strong>
+          <span class="lbl">${d.karten.length} Karten${d.modus==="gemeinsam"?" · gemeinsam":" · pro Spieler"}</span></span>
+      </button>`;}).join("")}</div>
+  </div>`;
+}
+
 /* ---------- Spieler ---------- */
 function spielerZeile(i,feld,label){
   const p=S.spieler[i];
@@ -1275,6 +1700,7 @@ function spielerZeile(i,feld,label){
     </div></div>`;
 }
 function seiteSpieler(){
+  const L=S.lauf,beute=L.beute||[];
   return `<div class="seite">
     <div class="seite-kopf">
       <div class="lbl">Spieler · ${S.spielerAnzahl}</div>
@@ -1282,6 +1708,8 @@ function seiteSpieler(){
         <button class="btn" data-akt="spieler-weniger" ${S.spielerAnzahl<=1?"disabled":""}>− Spieler</button>
         <button class="btn" data-akt="spieler-mehr" ${S.spielerAnzahl>=4?"disabled":""}>＋ Spieler</button>
       </div></div>
+    ${beute.length?`<div class="fuehrung"><strong>Beute der Gruppe:</strong> ${beute.map(id=>{
+      const info=belohnungskarteById(id); return info?esc(info.karte.name):id;}).join(", ")}</div>`:""}
     <div class="gitter">
       ${S.spieler.slice(0,S.spielerAnzahl).map((p,i)=>`
         <div class="kachel breit" style="--f:#7b8288;cursor:default;flex-direction:column;align-items:stretch;gap:9px">
@@ -1291,6 +1719,9 @@ function seiteSpieler(){
             ${spielerZeile(i,"geld","Geld")}
           </div>
           ${spielerZeile(i,"marker","Marker")}
+          <div class="lbl">Karten · ${(p.karten||[]).length}</div>
+          ${(p.karten||[]).length?`<div class="text">${(p.karten||[]).map(id=>{
+            const info=belohnungskarteById(id); return info?esc(info.karte.name):id;}).join(", ")}</div>`:""}
         </div>`).join("")}
     </div>
   </div>`;
@@ -1301,7 +1732,7 @@ function render(){
   document.getElementById("kopf").innerHTML=kopf();
   const m=document.getElementById("main");
   const unterwippe=`<div class="wippe klein">
-      ${[["brett","Brett"],["plaettchen","Plättchen"],["stufen","Stufen"],["kampagnen","Kampagnen"]].map(([b,n])=>
+      ${[["brett","Brett"],["plaettchen","Plättchen"],["stufen","Stufen"],["kampagnen","Kampagnen"],["belohnungen","Belohnungen"]].map(([b,n])=>
         `<button data-bau="${b}" class="${BAU===b?"an":""}">${n}</button>`).join("")}</div>`;
 
   if(MODUS==="spielen"){
@@ -1324,7 +1755,8 @@ function render(){
           <div class="paneel-in">${paneelBrett()}</div>
         </aside></div>`;
   }else{
-    m.innerHTML=unterwippe+(BAU==="plaettchen"?seitePlaettchen():BAU==="stufen"?seiteStufen():seiteKampagnen());
+    m.innerHTML=unterwippe+(BAU==="plaettchen"?seitePlaettchen():BAU==="stufen"?seiteStufen()
+      :BAU==="kampagnen"?seiteKampagnen():seiteBelohnungen());
   }
   verdrahten();
 }
@@ -1339,6 +1771,8 @@ function verdrahten(){
     BAU=b.dataset.bau; if(BAU==="brett")zentrierenBrett(); render();});
   const m=d.getElementById("main");
   m.querySelectorAll("[data-waehl]").forEach(b=>b.onclick=()=>waehlen(b.dataset.waehl));
+  m.querySelectorAll("[data-bel-waehl]").forEach(b=>b.onclick=()=>waehleBelohnung(b.dataset.belWaehl));
+  m.querySelectorAll("[data-bel-deck-waehl]").forEach(b=>b.onclick=()=>waehleBelohnungsDeck(b.dataset.belDeckWaehl));
   m.querySelectorAll("[data-rueck]").forEach(b=>b.onclick=()=>zurueckLaufen(b.dataset.rueck));
   m.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>dialogPlaettchen(b.dataset.edit));
   m.querySelectorAll("[data-stufe-edit]").forEach(b=>b.onclick=()=>dialogStufe(b.dataset.stufeEdit));
@@ -1348,6 +1782,7 @@ function verdrahten(){
   m.querySelectorAll("[data-kamp-start]").forEach(b=>b.onclick=()=>{
     const [kid,lvl]=b.dataset.kampStart.split(":");
     S.lauf=neuerKampagnenLauf(kid,+lvl);MODUS="spielen";zentrieren();speichern();render();});
+  m.querySelectorAll("[data-beldeck-edit]").forEach(b=>b.onclick=()=>dialogBelohnungsdeck(b.dataset.beldeckEdit));
   m.querySelectorAll("[data-pinsel]").forEach(b=>b.onclick=()=>{EDIT.pinsel=b.dataset.pinsel;render();});
   m.querySelectorAll("[data-spname]").forEach(inp=>inp.oninput=()=>{
     S.spieler[+inp.dataset.spname].name=inp.value;speichern();});
@@ -1382,11 +1817,13 @@ function aktion(a){
   else if(a==="rueck"){RUECKLAUF=true;render();}
   else if(a==="rueck-ab"){RUECKLAUF=false;render();}
   else if(a==="undo") bestaetigen("Undo wirklich ausführen?",undo);
+  else if(a==="bestanden") bestehenBestaetigt();
   else if(a==="neu") bestaetigen("Neuen Lauf wirklich starten? Der aktuelle Fortschritt geht verloren.",()=>{
     VORHER=[];S.lauf=neuerLaufAus(S.lauf.quelle);zentrieren();speichern();render();});
   else if(a==="neu-plaettchen") dialogPlaettchen(null);
   else if(a==="neu-stufe") dialogStufe(null);
   else if(a==="neu-kampagne") dialogKampagne(null);
+  else if(a==="neu-belohnungsdeck") dialogBelohnungsdeck(null);
   else if(a==="brett-neu") dialogBrett(null);
   else if(a==="brett-einst") dialogBrett(EDIT.brettId);
   else if(a==="startkarte") dialogStartkarte();
@@ -1411,7 +1848,7 @@ function aktion(a){
       Object.values(URLS).forEach(u=>URL.revokeObjectURL(u));URLS={};
       const p=saatPlaettchen(),f=saatBretter();
       S={plaettchen:p,bretter:f,stufen:saatStufen(p,f),lauf:null,spieler:standardSpieler(),spielerAnzahl:2,
-        kampagnen:[],arten:standardArten()};
+        kampagnen:[],arten:standardArten(),belohnungsdecks:saatBelohnungsdecks()};
       S.lauf=neuerLauf(S.stufen[0].id);EDIT.brettId=f[0].id;
       dlg().close();await speichern();zentrieren();render();})();}
 }
