@@ -43,15 +43,49 @@ const p = saatPlaettchen();
 const stufenIds = saatStufen(p, saatBretter()).map(s => s.id);
 let gesamtFehler = 0;
 
+// Zufallsspieler kennt bestehenAusstehend/belohnung nicht von selbst —
+// löst beides stellvertretend zufällig auf, damit belohnung-Pläattchen
+// (Kampf-1-Pool, Schrein) den Zufallslauf nicht blockieren.
+function resolveBelohnung() {
+  const L = S.lauf;
+  let guard = 0;
+  while ((L.bestehenAusstehend || L.belohnung) && guard++ < 50) {
+    if (L.bestehenAusstehend) { bestehenBestaetigt(); continue; }
+    const B = L.belohnung;
+    if (!B) break;
+    if (B.phase === "deck") {
+      waehleBelohnungsDeck(B.deckIds[Math.floor(Math.random() * B.deckIds.length)]);
+      continue;
+    }
+    if (B.kauf) {
+      // Shop: testweise kaufen, wenn Geld reicht, sonst Angebot schließen.
+      if (!B.ids.length) { shopSchliessen(); continue; }
+      const spIdx = Math.floor(Math.random() * S.spielerAnzahl);
+      const pick = B.ids[Math.floor(Math.random() * B.ids.length)];
+      const sp = S.spieler[spIdx];
+      const preis = shopPreis(B.preisstufe, (sp.karten || []).length);
+      if ((sp.geld || 0) >= preis) kaufeBelohnung(pick.id, spIdx);
+      else shopSchliessen();
+      continue;
+    }
+    if (B.ids.length) {
+      waehleBelohnung(B.ids[Math.floor(Math.random() * B.ids.length)].id);
+    } else break;
+  }
+}
+
 for (const stId of stufenIds) {
   const felder = [], scharm = [];
   let boss = 0, fehler = 0, sackgassen = 0, ruecklaeufe = 0;
   const enden = {};
 
   for (let n = 0; n < ${LAEUFE}; n++) {
-    S = { plaettchen: p, bretter: saatBretter(), stufen: null, lauf: null };
+    S = { plaettchen: p, bretter: saatBretter(), stufen: null, lauf: null,
+          spieler: standardSpieler().map(sp => ({ ...sp, geld: 999 })), spielerAnzahl: 2, arten: standardArten(),
+          belohnungsdecks: saatBelohnungsdecks() };
     S.stufen = saatStufen(p, S.bretter);
     S.lauf = neuerLauf(stId);
+    resolveBelohnung(); // Startfeld kann selbst ein Kampf mit sofortigem Bestanden-Gate sein (ST01)
     const startSack = S.lauf.sack.length;
     let schritte = 0;
 
@@ -68,7 +102,9 @@ for (const stId of stufenIds) {
 
       // Zufallsspieler: geht gelegentlich auf bekannte Felder zurück,
       // damit auch fest gelegte Plättchen wie der Endboss erreichbar sind.
-      if (belegt.length && Math.random() < 0.35) { ziehen(belegt[0].k); schritte++; continue; }
+      if (belegt.length && Math.random() < 0.35) {
+        ziehen(belegt[0].k); resolveBelohnung(); schritte++; continue;
+      }
 
       if (!frei.length || !L.sack.length) {
         const z = rueckZiele();
@@ -78,6 +114,7 @@ for (const stId of stufenIds) {
       }
       ziehen(frei[Math.floor(Math.random() * frei.length)].k);
       if (L.angebot) waehlen(L.angebot.ids[Math.floor(Math.random() * L.angebot.ids.length)]);
+      resolveBelohnung();
       schritte++;
     }
 
